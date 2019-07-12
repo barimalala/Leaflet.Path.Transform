@@ -28,7 +28,8 @@
   "author": "Alexander Milevski <info@w8r.name>",
   "license": "MIT",
   "dependencies": {
-    "leaflet-path-drag": "^1.1.0"
+    "leaflet-path-drag": "^1.1.0",
+    "leaflet.offline": "^1.0.4"
   },
   "devDependencies": {
     "eslint": "^5.9.0",

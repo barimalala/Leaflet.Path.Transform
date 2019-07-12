@@ -1,6 +1,7 @@
 var L = require('leaflet');
 var DragHandler = require('../../index');
 
+require('leaflet.offline')
 L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,33 +32,54 @@ function interpolateArr(array, insert) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-var polygon = global.polygon = new L.Polygon(
-  L.GeoJSON.coordsToLatLngs(
+// var polygon = global.polygon = new L.Polygon(
+//   L.GeoJSON.coordsToLatLngs(
 
-    // ~ 13 000 points
-    interpolateArr([
-      [113.97697448730469, 22.403410892712124],
-      [113.98658752441405, 22.38373008592495],
-      [114.01268005371094, 22.369126397545887],
-      [114.02778625488281, 22.38563480185718],
-      [114.04701232910156, 22.395157990290755],
-      [114.06005859375,    22.413567638369805],
-      [114.06280517578125, 22.432609534876796],
-      [114.04838562011717, 22.444668051657157],
-      [114.04289245605469, 22.44847578656544],
-      [114.03259277343749, 22.444668051657157],
-      [114.01954650878906, 22.447206553211814],
-      [113.99620056152344, 22.436417600763114],
-      [113.98178100585938, 22.420549970290875],
-      [113.97697448730469, 22.403410892712124]
-    ], 1000)
-  ), {
+//     // ~ 13 000 points
+//     interpolateArr([
+//       [113.97697448730469, 22.403410892712124],
+//       [113.98658752441405, 22.38373008592495],
+//       [114.01268005371094, 22.369126397545887],
+//       [114.02778625488281, 22.38563480185718],
+//       [114.04701232910156, 22.395157990290755],
+//       [114.06005859375,    22.413567638369805],
+//       [114.06280517578125, 22.432609534876796],
+//       [114.04838562011717, 22.444668051657157],
+//       [114.04289245605469, 22.44847578656544],
+//       [114.03259277343749, 22.444668051657157],
+//       [114.01954650878906, 22.447206553211814],
+//       [113.99620056152344, 22.436417600763114],
+//       [113.98178100585938, 22.420549970290875],
+//       [113.97697448730469, 22.403410892712124]
+//     ], 1000)
+//   ), {
+//     color: '#f00',
+//     interactive: true,
+//     draggable: true,
+//     transform: true
+//   })
+// .addTo(map);
+// polygon.transform.enable();
+
+
+
+var polygon = global.polygon = new L.polygon(
+  L.GeoJSON.coordsToLatLngs(
+    [
+      [114.0154266357422,22.244615500323064],
+      [114.0154266357422,22.334833457530486],
+      [114.14108276367189,22.334833457530486],
+      [114.14108276367189,22.244615500323064]
+    ]
+), {
     color: '#f00',
     interactive: true,
     draggable: true,
     transform: true
-  }).addTo(map);
-//polygon.transform.enable();
+  })
+  // .bindPopup("L.polygon")
+  .addTo(map);
+  polygon.transform.enable();
 
 var polyline = global.polyline = new L.Polyline(
   L.GeoJSON.coordsToLatLngs([
@@ -83,7 +105,7 @@ var polyline = global.polyline = new L.Polyline(
     transform: true
   })
   .bindPopup("L.Polyline")
-  .addTo(map);
+  // .addTo(map);
 // polyline.transform.enable();
 
 var rectangle = global.rectangle = new L.Rectangle(L.latLngBounds([
@@ -94,8 +116,8 @@ var rectangle = global.rectangle = new L.Rectangle(L.latLngBounds([
     draggable: true,
     transform: true
   })
-  .bindPopup("L.Rectangle")
-  .addTo(map);
+  // .bindPopup("L.Rectangle")
+  // .addTo(map);
 
 var polygonWithHole = global.polygonWithHole = new L.Polygon(
     [
@@ -134,14 +156,14 @@ var polygonWithHole = global.polygonWithHole = new L.Polygon(
         [114.29351806640625, 22.414202410321302],
         [114.30587768554686, 22.408489358342635],
         [114.32235717773438, 22.421184710331858],
-        [114.30107116699219, 22.43387890178297]
+        [114.30107116699219, 22]
       ])
     ], {
       draggable: true,
       transform: true
     }
   )
-  .addTo(map);
+  // .addTo(map);
 //polygonWithHole.transform.enable();
 
 var multiPolygon = global.multiPolygon = new L.Polygon([
@@ -188,7 +210,8 @@ var multiPolygon = global.multiPolygon = new L.Polygon([
   draggable: true,
   transform: true,
   color: '#092'
-}).bindPopup('MultiPolygon').addTo(map);
+}).bindPopup('MultiPolygon')
+// .addTo(map);
 //multiPolygon.transform.enable();
 
 var multiPolyline = global.multiPolyline = new L.Polyline([
@@ -218,7 +241,8 @@ var multiPolyline = global.multiPolyline = new L.Polyline([
   draggable: true,
   transform: true,
   color: '#e90'
-}).bindPopup('MultiPolyline').addTo(map);
+}).bindPopup('MultiPolyline')
+// .addTo(map);
 // multiPolyline.transform.enable();
 
 var layers = [polygon, polyline, rectangle, multiPolyline, multiPolygon, polygonWithHole];
