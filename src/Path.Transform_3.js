@@ -80,7 +80,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._center = null;
     this._width  = 0;
     this._height = 0;
-    this._rotation = 0;
+    this._angle = 0;
 	},
 
 	_createHandlers: function(){
@@ -97,15 +97,21 @@ L.Handler.PathTransform = L.Handler.extend({
     //     .addTo(this._handlersGroup));
     // }
     //height handler
-    lat=(this._rect._latlngs[0][1].lat+this._rect._latlngs[0][2].lat)/2;
-    lng=(this._rect._latlngs[0][1].lng+this._rect._latlngs[0][2].lng)/2;
+    // le height handler se place au dessus du centre de rotation
+    // console.log(this._angle);
+    // console.log(this._height);
+    [h,w]=this._rotatePoint([this._height/2,0],this._angle);
+    lat=this._center._latlng.lat+h;
+    lng=this._center._latlng.lng+w;
     this._handlers.push(
       this._createHandler([lat,lng],1, 5)
       .addTo(this._handlersGroup)
     );
-    //width
-    latW=(this._rect._latlngs[0][3].lat+this._rect._latlngs[0][2].lat)/2;
-    lngW=(this._rect._latlngs[0][3].lng+this._rect._latlngs[0][2].lng)/2;
+    //width handker se place a droite du centre de rotation
+    [h,w]=this._rotatePoint([0,this._width/2],this._angle);
+    latW=this._center._latlng.lat+h;
+    lngW=this._center._latlng.lng+w;
+    // [lat,lng]=this._rotatePoint([lat,lng],this._angle);
     this._handlers.push(
       this._createHandler([latW,lngW],2, 6)
       .addTo(this._handlersGroup)
@@ -240,17 +246,18 @@ L.Handler.PathTransform = L.Handler.extend({
       (latlngs[0].lat + latlngs[3].lat) / 2,
       (latlngs[0].lng + latlngs[3].lng) / 2);
     // hehe, top is a reserved word
-    var topPoint = new L.LatLng(
-      (latlngs[1].lat + latlngs[2].lat) / 2,
-      (latlngs[1].lng + latlngs[2].lng) / 2);
-    // console.log(bottom);
-    // console.log(topPoint);
+    //top point est au milieu au dessus du centre
+    [h,w]=this._rotatePoint([this._height/2,0],this._angle);
+    var topPoint = new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
     var handlerPosition = map.layerPointToLatLng(
       L.PathTransform.pointOnLine(
         map.latLngToLayerPoint(bottom),
         map.latLngToLayerPoint(topPoint),20)
     );
-
+    //incliner le handler
+    [h,w]=this._rotatePoint([this._height/2+0.01,0],this._angle);
+    handlerPosition.lat=this._center._latlng.lat+h;
+    handlerPosition.lng=this._center._latlng.lng+w;
     // console.log("here");
     this._handleLine = new L.Polyline([topPoint, handlerPosition],
       this.options.rotateHandleOptions).addTo(this._handlersGroup);
@@ -296,6 +303,9 @@ L.Handler.PathTransform = L.Handler.extend({
    */
   removeHooks: function() {
     console.log("removed");
+    if(this._handlersGroup!== null){
+      map.removeLayer(this._handlersGroup);
+    }
     // this._hideHandlers();
     this._path
       .off('dragstart', this._onDragStart, this)
@@ -311,7 +321,7 @@ L.Handler.PathTransform = L.Handler.extend({
 
   _onDragEnd: function(evt){
     var rect = this._rect;
-    this._init();
+    this._updateHandle();
   },
 
   _onRotateStart: function(evt) {
@@ -321,7 +331,7 @@ L.Handler.PathTransform = L.Handler.extend({
 
     this._rotationOriginPt = map.latLngToLayerPoint(this._getRotationOrigin());
     this._rotationStart    = evt.layerPoint;
-    this._angle = 0;
+    this._rotationStart.x=this._rotationOriginPt.x;
     this._path._map
       .on('mousemove', this._onRotate,     this)
       .on('mouseup',   this._onRotateEnd, this);
@@ -330,21 +340,18 @@ L.Handler.PathTransform = L.Handler.extend({
 
   _onRotate(evt){
     var pos = evt.layerPoint;
+    // pos.x=0;
     var previous = this._rotationStart;
-    // console.log(this._rotationMarker);
-    var origin   = this._rotationMarker._point;
-    // console.log("pos",pos.y,pos.x);
-    // console.log("origin",origin.y,origin.x);
-    // console.log("previous",previous.y,previous.x);
-    //calcule de l'angle de rotation
+    var origin   = this._rotationOriginPt;
     this._angle = Math.atan2(pos.y - origin.y, pos.x - origin.x) -
                   Math.atan2(previous.y - origin.y, previous.x - origin.x);
-                  console.log(this._angle);
-    this._updateRect(this._height,this._width,this._angle);
+                  // console.log(this._angle);
+    this._updateRect(this._width,this._height,this._angle);
     this._path.fire('rotate', { layer: this._path, rotation: this._angle });
   },
 
   _onRotateEnd(evt){
+    this._updateHandle();
     this._path._map
       .off('mousemove', this._onRotate, this)
       .off('mouseup',   this._onRotateEnd, this);
@@ -353,30 +360,52 @@ L.Handler.PathTransform = L.Handler.extend({
 
   _updateRect(width,height,angle){
     var map = this._map;
-    // angle=0.5949109565113153;
       y=h2=height/2;
       x=w2=width/2;
+    if(typeof angle !=='undefined'){
+      neRotate=this._rotatePoint([h2,w2],angle);
+      swRotate=this._rotatePoint([-h2,-w2],angle);
+      seRotate=this._rotatePoint([-h2,w2],angle);
+      nwRotate=this._rotatePoint([h2,-w2],angle);
+      
+      ne=[this._center._latlng.lat+neRotate[0],this._center._latlng.lng+neRotate[1]] //ne
+      sw=[this._center._latlng.lat+swRotate[0],this._center._latlng.lng+swRotate[1]] //sw
+      se=[this._center._latlng.lat+seRotate[0],this._center._latlng.lng+seRotate[1]] //se
+      nw=[this._center._latlng.lat+nwRotate[0],this._center._latlng.lng+nwRotate[1]] //nw
+      this._path.setLatLngs([nw,sw,se,ne]);
+    }else{
       ne=[this._center._latlng.lat+h2,this._center._latlng.lng+w2]
       sw=[this._center._latlng.lat-h2,this._center._latlng.lng-w2]
       se=[this._center._latlng.lat-h2,this._center._latlng.lng+w2]
       nw=[this._center._latlng.lat+h2,this._center._latlng.lng-w2]
-    if(typeof angle !=='undefined'){
-      acos=Math.acos(angle);
-      asin=Math.asin(angle);
-      yp=x*acos+y*asin;
-    }else{
       this._path.setLatLngs([sw,nw,ne,se]);
-      this._init();
+      this._updateHandle();
     }
-    // console.log(ne);
-    // console.log(sw);
-    // console.log(this._path.getLatLngs());
-    // console.log()
-    //     l'image de (x;y) par la rotation d'angle alpha et de centre (0,0) est le point (x',y') où 
-    // [B]x' = x.cos (alpha) - y.sin (alpha)
-    // y' = x. sin (alpha) + y.cos (alpha)[/B]
   },
 
+  _rotatePoint(latlng,angle){
+    acos=Math.cos(angle);
+    asin=Math.sin(angle);
+    const [x,y]=latlng;
+    xPrime=x*acos-y*asin;
+    yPrime=x*asin+y*acos;
+    return [xPrime,yPrime]
+  },
+
+  _updateHandle(){
+    //on met a jours le position des pointeurs
+    var map = this._map;
+    if(this._handlersGroup!== null){
+      map.removeLayer(this._handlersGroup);
+    }
+    this._handlersGroup = new L.LayerGroup().addTo(map);
+    this._rect = this._getBoundingPolygon();
+    this._origine_latlngs = this._rect._latlngs[0];
+    var center_latlng = this._getRotationOrigin();
+    this._center = this._createHandler([center_latlng.lat,center_latlng.lng],5,1).addTo(this._handlersGroup);
+    this._handlers = [];
+    this._createHandlers();
+  },
   _init: function(){
     // return;
     // this._rectShape = this._rect.toGeoJSON();
@@ -385,34 +414,12 @@ L.Handler.PathTransform = L.Handler.extend({
       map.removeLayer(this._handlersGroup);
     }
     this._handlersGroup = new L.LayerGroup().addTo(map);
-    if(this._path){
-      _latlngs=this._path._latlngs;
-      // map.removeLayer(this._path);
-      // 22.244615500323064 114.0154266357422
-      // 22.334833457530486 114.0154266357422
-      // 22.334833457530486 114.14108276367189
-      // 22.244615500323064 114.14108276367189
-
-    }
-    // console.log(_latlngs);
-    // this._path = L.Polygon([
-    //   [22.244615500323064, 114.0154266357422],
-    //   [22.334833457530486, 114.0154266357422],
-    //   [22.334833457530486, 114.14108276367189],
-    //   [22.244615500323064, 114.14108276367189]
-    // ]).addTo(map);
-    // console.log("after replacing");
     this._rect = this._getBoundingPolygon();
-    // console.log("initield");
     this._origine_latlngs = this._rect._latlngs[0];
-    // console.log("_origine_latlngs",this._origine_latlngs);
-    // console.log("bounds",this._rect.getBounds());
-
     var center_latlng = this._getRotationOrigin();
     this._center = this._createHandler([center_latlng.lat,center_latlng.lng],5,1).addTo(this._handlersGroup);
     this._height = this._origine_latlngs[1].lat - this._origine_latlngs[0].lat;
     this._width = this._origine_latlngs[2].lng - this._origine_latlngs[0].lng;
-    // console.log("height width before init",[this._width,this._height]);
     this._handlers = [];
     this._createHandlers();
     this._path
