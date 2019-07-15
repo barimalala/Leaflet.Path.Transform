@@ -200,6 +200,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._map
       .off('mousemove', this._onScale,    this)
       .off('mouseup',   this._onScaleEnd, this);
+    this._updateHandle();
   },
   /**
    * Bounding polygon
@@ -362,6 +363,7 @@ L.Handler.PathTransform = L.Handler.extend({
     var map = this._map;
       y=h2=height/2;
       x=w2=width/2;
+      angle=this._angle;
     if(typeof angle !=='undefined'){
       neRotate=this._rotatePoint([h2,w2],angle);
       swRotate=this._rotatePoint([-h2,-w2],angle);
@@ -373,6 +375,7 @@ L.Handler.PathTransform = L.Handler.extend({
       se=[this._center._latlng.lat+seRotate[0],this._center._latlng.lng+seRotate[1]] //se
       nw=[this._center._latlng.lat+nwRotate[0],this._center._latlng.lng+nwRotate[1]] //nw
       this._path.setLatLngs([nw,sw,se,ne]);
+      // this._updateHandle();
     }else{
       ne=[this._center._latlng.lat+h2,this._center._latlng.lng+w2]
       sw=[this._center._latlng.lat-h2,this._center._latlng.lng-w2]
