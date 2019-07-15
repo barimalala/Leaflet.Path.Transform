@@ -256,7 +256,7 @@ L.Handler.PathTransform = L.Handler.extend({
         map.latLngToLayerPoint(topPoint),20)
     );
     //incliner le handler
-    [h,w]=this._rotatePoint([this._height/2+0.01,0],this._angle);
+    [h,w]=this._rotatePoint([this._height/2*1.2,0],this._angle);
     handlerPosition.lat=this._center._latlng.lat+h;
     handlerPosition.lng=this._center._latlng.lng+w;
     // console.log("here");
