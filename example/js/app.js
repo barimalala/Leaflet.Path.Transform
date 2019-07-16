@@ -7,7 +7,7 @@ L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
 ////////////////////////////////////////////////////////////////////////////////
 var map = global.map = new L.Map('map', {
   // crs: L.CRS.EPSG4326 // that was tested as well
-}).setView([22.42658, 114.1952], 11);
+}).setView([22.536, 113.9026], 17);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
   attribution: '&copy; ' +
@@ -66,10 +66,10 @@ function interpolateArr(array, insert) {
 var polygon = global.polygon = new L.polygon(
   L.GeoJSON.coordsToLatLngs(
     [
-      [114.0154266357422,22.244615500323064],
-      [114.0154266357422,22.334833457530486],
-      [114.14108276367189,22.334833457530486],
-      [114.14108276367189,22.244615500323064]
+      [113.90030631503639,22.535867387761293],
+      [113.90030631503639,22.53814945302664],
+      [113.90438309231219,22.53814945302664],
+      [113.90438309231219,22.535867387761293]
     ]
 ), {
     color: '#f00',
