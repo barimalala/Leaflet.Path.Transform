@@ -46,25 +46,25 @@ L.PathTransform.RotateHandle = L.PathTransform.Handle.extend({
 });
 
 L.Handler.PathTransform = L.Handler.extend({
-	options: {
-	    handlerOptions: {
-	      radius:      5,
-	      fillColor:   '#ffffff',
-	      color:       '#202020',
-	      fillOpacity: 1,
-	      weight:      2,
-	      opacity:     0.7,
-	      setCursor:   true
-	    },
-	    transform:  	 true,
+  options: {
+      handlerOptions: {
+        radius:      5,
+        fillColor:   '#ffffff',
+        color:       '#202020',
+        fillOpacity: 1,
+        weight:      2,
+        opacity:     0.7,
+        setCursor:   true
+      },
+      transform:     true,
     handleClass:       L.PathTransform.Handle,
     rotateHandleClass: L.PathTransform.RotateHandle
-	},
-	initialize: function(path) {
-		this._path = path;
-		this._map  = null;
-		this._handlersGroup = null;
-		this._handlers = [];
+  },
+  initialize: function(path) {
+    this._path = path;
+    this._map  = null;
+    this._handlersGroup = null;
+    this._handlers = [];
     this._rect = null ;
     // handlers
     this._activeMarker   = null;
@@ -83,9 +83,9 @@ L.Handler.PathTransform = L.Handler.extend({
     this._width  = 0;
     this._height = 0;
     this._angle = 0;
-	},
+  },
 
-	_createHandlers: function(use_temp_params=false){
+  _createHandlers: function(use_temp_params=false){
     //width handler
     height=(use_temp_params)?this._temp_height:this._height;
     width=(use_temp_params)?this._temp_width:this._width;
@@ -119,7 +119,7 @@ L.Handler.PathTransform = L.Handler.extend({
     //   this._createHandler([latW,lngW],2, 6)
     //   .addTo(this._handlersGroup)
     // );
-	},
+  },
 
   /**
    * Create corner marker
@@ -132,10 +132,10 @@ L.Handler.PathTransform = L.Handler.extend({
     var HandleClass = this.options.handleClass;
     var marker = new HandleClass(latlng,
       {
-        radius:      1,
+        radius:      0,
         fillColor:   '#ffffff',
         color:       '#202020',
-        fillOpacity: 0,
+        fillOpacity: 0, 
         weight:      1,
         opacity:     0,
         setCursor:   true,
@@ -147,7 +147,7 @@ L.Handler.PathTransform = L.Handler.extend({
     return marker;
    },
   _createHandler: function(latlng, type, index) {
-  	// console.log(this.options);
+    // console.log(this.options);
     var HandleClass = this.options.handleClass;
     // console.log(HandleClass);
     var marker = new HandleClass(latlng,
@@ -173,8 +173,11 @@ L.Handler.PathTransform = L.Handler.extend({
     this._scaleOriginIndex=(marker.options.index + 2) % 4;
     this._scaleOriginLatlng = this._handlers[this._scaleOriginIndex].getLatLng();
     // console.log(this._handlers[this._scaleOriginIndex]);
-    this._origdistX = this._center._point.x-this._activeMarker._point.x;
-    this._origdistY = this._center._point.y-this._activeMarker._point.y;
+    // console.log(this._center);
+    // console.log(this._activeMarker);
+    this._origdistX = this._activeMarker._latlng.lng-this._center._latlng.lng;
+    this._origdistY = this._activeMarker._latlng.lat-this._center._latlng.lat;
+    [this._origdistX,this._origdistY] =this._rotatePoint([this._origdistX,this._origdistY],this._angle);
     this._map
       .off('mousemove', this._onScale,    this)
       .off('mouseup',   this._onScaleEnd, this)
@@ -189,11 +192,18 @@ L.Handler.PathTransform = L.Handler.extend({
 
   _onScale:function(evt){
     //on recuper l'ecart par rapport a la hauteur et a la longueur
-    distX = this._center._point.x-evt.layerPoint.x;
-    disty = this._center._point.y-evt.layerPoint.y;
+    // console.log(evt);
+    distX = evt.latlng.lng-this._center._latlng.lng;
+    disty = evt.latlng.lat-this._center._latlng.lat;
+    [distX,disty] =this._rotatePoint([distX,disty],this._angle);
+    ratioX=(1+distX/this._origdistX)/2;
+    ratioY=(1+disty/this._origdistY)/2;
+    // console.log("ratio de reduction",ratioX,ratioY);
+    this._temp_width = this._width*ratioX;
+    this._temp_height = this._height*ratioY;
+    // console.log("_scaleOriginIndex",this._scaleOriginIndex);
+    // console.log("width",this._temp_width);
 
-    this._temp_width = this._width*(1+distX/this._origdistX)/2;
-    this._temp_height = this._height*(1+disty/this._origdistY)/2;
     this._updateRect(this._temp_width,this._temp_height);
     // if(console.log(this._handlers[2].setLatLng));
     this._handlers[0].setLatLng(this._current_latlngs[0]);
@@ -204,11 +214,14 @@ L.Handler.PathTransform = L.Handler.extend({
     // this._updateHandle(true);
   },
   _onScaleEnd:function(evt){
-    distX = this._center._point.x-evt.layerPoint.x;
-    disty = this._center._point.y-evt.layerPoint.y;
+    distX = evt.latlng.lng-this._center._latlng.lng;
+    disty = evt.latlng.lat-this._center._latlng.lat;
+    [distX,disty] =this._rotatePoint([distX,disty],this._angle);
     // console.log("distance scaling",)
-    this._width = this._width*(1+distX/this._origdistX)/2;
-    this._height = this._height*(1+disty/this._origdistY)/2;
+    ratioX=(1+distX/this._origdistX)/2;
+    ratioY=(1+disty/this._origdistY)/2;
+    this._width = this._width*ratioX;
+    this._height = this._height*ratioY;
 
     // this._width = this._width*distX/this._origdistX;
     // this._height = this._height*disty/this._origdistY;
@@ -333,7 +346,7 @@ L.Handler.PathTransform = L.Handler.extend({
    * Init interactions and handlers
    */
   addHooks: function() {
-  	// console.log("addHooks");
+    // console.log("addHooks");
     this._init();
   },
 
@@ -343,7 +356,7 @@ L.Handler.PathTransform = L.Handler.extend({
   removeHooks: function() {
     // console.log("removed");
     if(this._handlersGroup!== null){
-      map.removeLayer(this._handlersGroup);
+      this._map.removeLayer(this._handlersGroup);
     }
     // this._hideHandlers();
     this._path
@@ -355,13 +368,15 @@ L.Handler.PathTransform = L.Handler.extend({
   },
 
   _onDragStart: function(){
-
+    // console.log("dragStart");
+    // this._map.removeLayer(this._handlersGroup);
   },
 
   _onDragEnd: function(evt){
     var rect = this._rect;
     this._updateHandle();
-    map.dragging.enable();
+    this._map.dragging.enable();
+    
     // console.log(rect._latlngs[0]);
   },
 
@@ -394,7 +409,7 @@ L.Handler.PathTransform = L.Handler.extend({
 
   _onRotateEnd(evt){
     this._updateHandle();
-    map.dragging.enable();
+    this._map.dragging.enable();
     this._path._map
       .off('mousemove', this._onRotate, this)
       .off('mouseup',   this._onRotateEnd, this);
@@ -405,8 +420,12 @@ L.Handler.PathTransform = L.Handler.extend({
     var map = this._map;
       y=h2=height/2;
       x=w2=width/2;
+
+      // y=h2=height;
+      // x=w2=width;
       angle=this._angle;
-    if(typeof angle !=='undefined'){
+      // console.log(angle);
+    if(typeof angle !=='undefined' || 1){ //l'angle est deja initialise mais garde quand meme l'ancien code
       neRotate=this._rotatePoint([h2,w2],angle);
       swRotate=this._rotatePoint([-h2,-w2],angle);
       seRotate=this._rotatePoint([-h2,w2],angle);
@@ -421,6 +440,7 @@ L.Handler.PathTransform = L.Handler.extend({
       // console.log(this._scaleOriginLatlng);
       // console.log("coords",[ne,sw,se,nw])
       // console.log(this._scaleOriginIndex);
+      // this._scaleOriginIndex=null;
       switch(this._scaleOriginIndex){
         case 0: //sw
           lat_dep=sw[0]-this._scaleOriginLatlng.lat;
@@ -531,6 +551,8 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handlers = [];
     this._createHandlers();
     this._path
+      .off('dragstart', this._onDragStart, this)
+      .off('dragend',   this._onDragEnd,   this)
       .on('dragstart', this._onDragStart, this)
       .on('dragend',   this._onDragEnd,   this);
   },
@@ -558,7 +580,7 @@ L.Handler.PathTransform = L.Handler.extend({
 
 
 L.Path.addInitHook(function() {
-	// console.log("initied")
+  // console.log("initied")
   if (this.options.transform) {
     this.transform = new L.Handler.PathTransform(this, this.options.transform);
   }
