@@ -531,8 +531,6 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handlers = [];
     this._createHandlers();
     this._path
-      .off('dragstart', this._onDragStart, this)
-      .off('dragend',   this._onDragEnd,   this)
       .on('dragstart', this._onDragStart, this)
       .on('dragend',   this._onDragEnd,   this);
   },
