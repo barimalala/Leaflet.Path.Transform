@@ -247,6 +247,7 @@ var multiPolyline = global.multiPolyline = new L.Polyline([
 
 var layers = [polygon, polyline, rectangle, multiPolyline, multiPolygon, polygonWithHole];
 
+layers = [polygon];
 function update() {
   L.Util.requestAnimFrame(function() {
     var dragging = document.querySelector('#dragging').checked;
@@ -268,8 +269,19 @@ function update() {
       layer.transform.setOptions({
         scaling: scaling,
         rotation: rotation,
-        uniformScaling: uniform
+        uniformScaling: uniform,
+        angleRotationInit:Math.PI/6,
+        centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
+        // zoomInit:16,
+        // heightInit:0.001,
+        // rectangle:{
+        //   centerLatlng:{ lat: 22.53522469923445, lng: 113.90134692192075 },
+        // },
+        centering: true,
       }).enable();
+      // layer.on("scale",(e)=>{
+      //   console.log("transformed",e);
+      // })
     });
   });
 }

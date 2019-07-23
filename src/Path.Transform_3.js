@@ -2,7 +2,7 @@
 
 /**
  * Marker handler
- * @extends {L.CircleMarker}
+ * @extends {L.CircleMarker}``
  */
 L.PathTransform.Handle = L.CircleMarker.extend({
   options: {
@@ -47,6 +47,16 @@ L.PathTransform.RotateHandle = L.PathTransform.Handle.extend({
 
 L.Handler.PathTransform = L.Handler.extend({
   options: {
+      rotation: true,
+      scaling:  true,
+      uniformScaling: true,
+      maxZoom:  22,
+      angleRotationInit: 0,
+      centerLatlngInit:null,
+      widthInit:0,
+      heightInit:0,
+      zoomInit:0,
+
       handlerOptions: {
         radius:      5,
         fillColor:   '#ffffff',
@@ -66,6 +76,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handlersGroup = null;
     this._handlers = [];
     this._rect = null ;
+    this._centerLatlngInit = null;
     // handlers
     this._activeMarker   = null;
     this._originMarker   = null;
@@ -183,11 +194,8 @@ L.Handler.PathTransform = L.Handler.extend({
       .off('mouseup',   this._onScaleEnd, this)
       .on('mousemove', this._onScale,    this)
       .on('mouseup',   this._onScaleEnd, this);
-
-    this._path
-      .fire('transformstart', { layer: this._path })
-      .fire('scalestart', { layer: this._path, scale: L.point(1, 1) });
-
+    this._fire("transformstart");
+    this._fire("scalestart");
   },
 
   _onScale:function(evt){
@@ -212,6 +220,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handlers[3].setLatLng(this._current_latlngs[3]);
     //on met a jours les marker !
     // this._updateHandle(true);
+    this._fire("scale");
   },
   _onScaleEnd:function(evt){
     distX = evt.latlng.lng-this._center._latlng.lng;
@@ -232,6 +241,8 @@ L.Handler.PathTransform = L.Handler.extend({
       .off('mouseup',   this._onScaleEnd, this);
     this._updateHandle();
     this._scaleOriginIndex=null;
+    this._fire("transformed");
+    this._fire("scaleend");
   },
   /**
    * Bounding polygon
@@ -370,14 +381,25 @@ L.Handler.PathTransform = L.Handler.extend({
   _onDragStart: function(){
     // console.log("dragStart");
     // this._map.removeLayer(this._handlersGroup);
+    this._destroyScaleHandlers();
+    this._fire("transformstart");
   },
 
   _onDragEnd: function(evt){
     var rect = this._rect;
     this._updateHandle();
     this._map.dragging.enable();
-    
-    // console.log(rect._latlngs[0]);
+
+    this._fire("transformed");
+  },
+  _fire(eventName){
+    this._path.fire(eventName, {
+      centerLatlng: this._center._latlng,
+      angle: this._angle,
+      height: this._height,
+      width: this._width,
+      path: this._path,
+    });
   },
 
   _onRotateStart: function(evt) {
@@ -392,7 +414,8 @@ L.Handler.PathTransform = L.Handler.extend({
     this._path._map
       .on('mousemove', this._onRotate,     this)
       .on('mouseup',   this._onRotateEnd, this);
-
+    this._fire("transformstart");
+    this._fire("rotatestart");
   },
 
   _onRotate(evt){
@@ -404,7 +427,7 @@ L.Handler.PathTransform = L.Handler.extend({
                   Math.atan2(previous.y - origin.y, previous.x - origin.x);
                   // console.log(this._angle);
     this._updateRect(this._width,this._height,this._angle);
-    this._path.fire('rotate', { layer: this._path, rotation: this._angle });
+    this._fire("rotate");
   },
 
   _onRotateEnd(evt){
@@ -413,17 +436,20 @@ L.Handler.PathTransform = L.Handler.extend({
     this._path._map
       .off('mousemove', this._onRotate, this)
       .off('mouseup',   this._onRotateEnd, this);
+    this._fire("rotateend");
+    this._fire("transformed");
   },
 
 
-  _updateRect(width,height,angle){
+  _updateRect(width,height,angle,centerLatlng){
     var map = this._map;
+    var centerLatlng = centerLatlng || this._center._latlng;
+    // console.log("centerLatlng",centerLatlng);
       y=h2=height/2;
       x=w2=width/2;
 
-      // y=h2=height;
-      // x=w2=width;
       angle=this._angle;
+
       // console.log(angle);
     if(typeof angle !=='undefined' || 1){ //l'angle est deja initialise mais garde quand meme l'ancien code
       neRotate=this._rotatePoint([h2,w2],angle);
@@ -431,10 +457,10 @@ L.Handler.PathTransform = L.Handler.extend({
       seRotate=this._rotatePoint([-h2,w2],angle);
       nwRotate=this._rotatePoint([h2,-w2],angle);
       
-      ne=[this._center._latlng.lat+neRotate[0],this._center._latlng.lng+neRotate[1]] //ne
-      sw=[this._center._latlng.lat+swRotate[0],this._center._latlng.lng+swRotate[1]] //sw
-      se=[this._center._latlng.lat+seRotate[0],this._center._latlng.lng+seRotate[1]] //se
-      nw=[this._center._latlng.lat+nwRotate[0],this._center._latlng.lng+nwRotate[1]] //nw
+      ne=[centerLatlng.lat+neRotate[0],centerLatlng.lng+neRotate[1]] //ne
+      sw=[centerLatlng.lat+swRotate[0],centerLatlng.lng+swRotate[1]] //sw
+      se=[centerLatlng.lat+seRotate[0],centerLatlng.lng+seRotate[1]] //se
+      nw=[centerLatlng.lat+nwRotate[0],centerLatlng.lng+nwRotate[1]] //nw
       //recuperer le latlong du scaleOrigine pt et reajuster la positionnement de facon a ce que
       //ce point reste fixe !
       // console.log(this._scaleOriginLatlng);
@@ -502,10 +528,10 @@ L.Handler.PathTransform = L.Handler.extend({
       this._current_latlngs=[se,sw,nw,ne];
       this._path.setLatLngs([nw,sw,se,ne]);
     }else{
-      ne=[this._center._latlng.lat+h2,this._center._latlng.lng+w2]
-      sw=[this._center._latlng.lat-h2,this._center._latlng.lng-w2]
-      se=[this._center._latlng.lat-h2,this._center._latlng.lng+w2]
-      nw=[this._center._latlng.lat+h2,this._center._latlng.lng-w2]
+      ne=[centerLatlng.lat+h2,centerLatlng.lng+w2]
+      sw=[centerLatlng.lat-h2,centerLatlng.lng-w2]
+      se=[centerLatlng.lat-h2,centerLatlng.lng+w2]
+      nw=[centerLatlng.lat+h2,centerLatlng.lng-w2]
       this._path.setLatLngs([sw,nw,ne,se]);
       this._updateHandle();
     }
@@ -530,11 +556,12 @@ L.Handler.PathTransform = L.Handler.extend({
     this._rect = this._getBoundingPolygon();
     this._origine_latlngs = this._rect._latlngs[0];
     var center_latlng = this._getRotationOrigin();
+    // console.log("center_latlng",center_latlng);
     this._center = this._createCenter([center_latlng.lat,center_latlng.lng],10,10).addTo(this._handlersGroup);
     this._handlers = [];
     this._createHandlers(use_temp_params);
   },
-  _init: function(){
+   _init: async function(){
     // return;
     // this._rectShape = this._rect.toGeoJSON();
     var map = this._map;
@@ -543,11 +570,12 @@ L.Handler.PathTransform = L.Handler.extend({
     }
     this._handlersGroup = new L.LayerGroup().addTo(map);
     this._rect = this._getBoundingPolygon();
-    this._origine_latlngs = this._rect._latlngs[0];
-    var center_latlng = this._getRotationOrigin();
+    // console.log("rect",this._rect);
+    this._origine_latlngs = this._origine_latlngs || this._rect._latlngs[0];
+    var center_latlng = await this.options.centerLatlngInit || this._getRotationOrigin();
     this._center = this._createCenter([center_latlng.lat,center_latlng.lng],10,10).addTo(this._handlersGroup);
-    this._height = this._origine_latlngs[1].lat - this._origine_latlngs[0].lat;
-    this._width = this._origine_latlngs[2].lng - this._origine_latlngs[0].lng;
+    this._height = await this.options.heightInit || this._origine_latlngs[1].lat - this._origine_latlngs[0].lat;
+    this._width = await this.options.widthInit || this._origine_latlngs[2].lng - this._origine_latlngs[0].lng;
     this._handlers = [];
     this._createHandlers();
     this._path
@@ -555,6 +583,21 @@ L.Handler.PathTransform = L.Handler.extend({
       .off('dragend',   this._onDragEnd,   this)
       .on('dragstart', this._onDragStart, this)
       .on('dragend',   this._onDragEnd,   this);
+
+    // console.log("angle",this._angle);
+
+    if(this.options.angleRotationInit!==0 || this.options.centerLatlngInit!== null){
+      this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
+      this._updateHandle();
+    }
+    if(this.options.centering){
+      if(this.options.zoomInit!==0)
+        map.flyTo(center_latlng, this.options.zoomInit)
+      else
+        map.panTo(center_latlng);
+    }
+    
+    // if(this.options.centering )
   },
   /**
    * Change editing options
@@ -573,7 +616,10 @@ L.Handler.PathTransform = L.Handler.extend({
     if (enabled) {
       this.enable();
     }
-
+    // console.log(this.options);
+    if(this.options.angleRotationInit !== 0){
+      this._angle=this.options.angleRotationInit;
+    }
     return this;
   },
 })
