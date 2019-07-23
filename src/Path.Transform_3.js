@@ -56,6 +56,7 @@ L.Handler.PathTransform = L.Handler.extend({
       widthInit:0,
       heightInit:0,
       zoomInit:0,
+      centering:false,
 
       handlerOptions: {
         radius:      5,
@@ -598,6 +599,7 @@ L.Handler.PathTransform = L.Handler.extend({
     }
     
     // if(this.options.centering )
+    this._fire("initialished");
   },
   /**
    * Change editing options
