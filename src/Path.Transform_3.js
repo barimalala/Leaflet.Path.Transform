@@ -84,8 +84,10 @@ L.Handler.PathTransform = L.Handler.extend({
     this._rotationMarker = null;
     this._rotationOriginPt = null
     this._rotationStart = null;
+    this._dragStart = null;
     this._origine_latlngs = null
     this._current_latlngs = null;
+    this._current_center = null;
     this._origdistX=0;
     this._origdistY=0;
     this._scaleOriginLatlng = [];
@@ -221,7 +223,12 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handlers[3].setLatLng(this._current_latlngs[3]);
     //on met a jours les marker !
     // this._updateHandle(true);
-    this._fire("scale");
+    this._fire("scale",{
+      width:this._temp_width,
+      height:this._temp_height,
+      centerLatlng:this._current_center,
+      latlng:this._current_latlngs
+    });
   },
   _onScaleEnd:function(evt){
     distX = evt.latlng.lng-this._center._latlng.lng;
@@ -379,27 +386,45 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handlers = [];
   },
 
-  _onDragStart: function(){
+  _onDragStart: function(evt){
     // console.log("dragStart");
     // this._map.removeLayer(this._handlersGroup);
     this._destroyScaleHandlers();
     this._fire("transformstart");
+    // console.log(evt);
+    this._path._map.on('mousemove', this._onDrag,this)
+  },
+
+  _onDrag: function(evt){
+    // console.log("dragging");
+    this._dragStart = this._dragStart || evt.latlng;
+    var pos = evt.latlng;
+    // console.log(this._center);
+    this._current_center=L.latLng(
+      this._center._latlng.lat+(pos.lat-this._dragStart.lat),
+      this._center._latlng.lng+(pos.lng-this._dragStart.lng)
+      );
+    this._fire("drag",{
+      centerLatlng:this._current_center,
+    })
   },
 
   _onDragEnd: function(evt){
+    this._dragStart=null;
     var rect = this._rect;
+    this._path._map.off('mousemove', this._onDrag,     this)
     this._updateHandle();
     this._map.dragging.enable();
-
     this._fire("transformed");
   },
-  _fire(eventName){
+  _fire(eventName,override){
     this._path.fire(eventName, {
       centerLatlng: this._center._latlng,
       angle: this._angle,
       height: this._height,
       width: this._width,
       path: this._path,
+      ...override
     });
   },
 
@@ -527,6 +552,7 @@ L.Handler.PathTransform = L.Handler.extend({
         break;
       }
       this._current_latlngs=[se,sw,nw,ne];
+      this._current_center=L.latLng((se[0]+nw[0])/2,(se[1]+nw[1])/2);
       this._path.setLatLngs([nw,sw,se,ne]);
     }else{
       ne=[centerLatlng.lat+h2,centerLatlng.lng+w2]
