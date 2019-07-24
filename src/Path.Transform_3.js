@@ -404,7 +404,7 @@ L.Handler.PathTransform = L.Handler.extend({
       this._center._latlng.lat+(pos.lat-this._dragStart.lat),
       this._center._latlng.lng+(pos.lng-this._dragStart.lng)
       );
-    this._fire("drag",{
+    this._fire("dragging",{
       centerLatlng:this._current_center,
     })
   },
