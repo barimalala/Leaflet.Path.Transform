@@ -1,6 +1,6 @@
 {
-  "name": "leaflet-path-transform",
-  "version": "1.1.2",
+  "name": "leaflet-path-transform-proportionnal-scalable",
+  "version": "1.2.0",
   "description": "Scale/rotate/move plugin for leaflet vector layers ",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "geometry",
     "edit"
   ],
-  "author": "Alexander Milevski <info@w8r.name>",
+  "author": "Barimalala Razafindratsimba <razbarry9392@gmail.com> inspired by Alexander Milevski <info@w8r.name>",
   "license": "MIT",
   "dependencies": {
     "leaflet-path-drag": "^1.1.0",
@@ -44,10 +44,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/w8r/Leaflet.Path.Transform.git"
+    "url": "git+https://github.com/barimalala/Leaflet.Path.Transform.git"
   },
   "bugs": {
-    "url": "https://github.com/w8r/Leaflet.Path.Transform/issues"
+    "url": "https://github.com/barimalala/Leaflet.Path.Transform/issues"
   },
-  "homepage": "https://github.com/w8r/Leaflet.Path.Transform#readme"
+  "homepage": "https://github.com/barimalala/Leaflet.Path.Transform#readme"
 }

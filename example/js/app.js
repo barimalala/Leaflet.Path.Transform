@@ -279,9 +279,9 @@ function update() {
         // },
         centering: true,
       }).enable();
-      // layer.on("scale",(e)=>{
-      //   console.log("transformed",e);
-      // })
+      layer.on("drag",(e)=>{
+        console.log("drag",e.centerLatlng);
+      })
     });
   });
 }
