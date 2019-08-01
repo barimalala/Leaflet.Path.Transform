@@ -6,12 +6,19 @@ L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
 
 ////////////////////////////////////////////////////////////////////////////////
 var map = global.map = new L.Map('map', {
-  // crs: L.CRS.EPSG4326 // that was tested as well
-}).setView([22.536, 113.9026], 17);
+  // crs: L.CRS.EPSG4326, // that was tested as well
+  // crs: L.CRS.Simple,
+})
+// .setView([5.088776800000005, 45.7234181], 19);
+// centerLatlngInit:{ lat: 45.7234181, lng: 5.088776800000005 },
+.setView([22.536, 113.9026], 18);
+// .setView([113.9026,22.536], 17);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
   attribution: '&copy; ' +
-    '<a href="http://osm.org/copyright">OSM</a> contributors'
+    '<a href="http://osm.org/copyright">OSM</a> contributors',
+    // crs: L.CRS.Simple,
+    // continuousWorld: true,
 }).addTo(map);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,14 +71,19 @@ function interpolateArr(array, insert) {
 
 
 var polygon = global.polygon = new L.polygon(
-  L.GeoJSON.coordsToLatLngs(
+  // L.GeoJSON.coordsToLatLngs(
     [
-      [113.90030631503639,22.535867387761293],
-      [113.90030631503639,22.53814945302664],
-      [113.90438309231219,22.53814945302664],
-      [113.90438309231219,22.535867387761293]
+      // [113.90030631503639,22.535867387761293],
+      // [113.90030631503639,22.53814945302664],
+      // [113.90438309231219,22.53814945302664],
+      // [113.90438309231219,22.535867387761293]
+      [45.723294849819005, 5.088599774205029],
+      [45.723541350181, 5.088599774205029],
+      [45.723541350181, 5.088953825794981],
+      [45.723294849819005, 5.088953825794981],
     ]
-), {
+// )
+, {
     color: '#f00',
     interactive: true,
     draggable: true,
@@ -270,9 +282,11 @@ function update() {
         scaling: scaling,
         rotation: rotation,
         uniformScaling: uniform,
-        angleRotationInit:Math.PI/6,
-        centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
-        // zoomInit:16,
+        // angleRotationInit:Math.PI/6,
+        // centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
+        // centerLatlngInit:{ lat: 45.7234181, lng: 5.088776800000005 },
+        // 45.7234181, 5.088776800000005
+        // zoomInit:18,
         // heightInit:0.001,
         // rectangle:{
         //   centerLatlng:{ lat: 22.53522469923445, lng: 113.90134692192075 },
@@ -280,7 +294,7 @@ function update() {
         centering: true,
       }).enable();
       layer.on("drag",(e)=>{
-        console.log("drag",e.centerLatlng);
+        // console.log("drag",e.centerLatlng);
       })
     });
   });

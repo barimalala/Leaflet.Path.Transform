@@ -653,16 +653,9 @@ L.Handler.PathTransform = L.Handler.extend({
       ratioX = (originPoint.x - evt.layerPoint.x) / this._initialDistX;
       ratioY = (originPoint.y - evt.layerPoint.y) / this._initialDistY;
     }
-    // console.log("originPoint",originPoint);
-    // console.log("layerPoint",evt.layerPoint);
-    // console.log("_initialDist",this._initialDist)
-    // console.log("_initialDistX",this._initialDistX)
-    // console.log("_initialDistY",this._initialDistY)
-    // ratioY=ratioX=1.25;
-    // ratioX=1.25;
+
     this._scale = new L.Point(ratioX, ratioY);
-    // this._scale.y=1;
-    // console.log("scaling",this._scale);
+
     // update matrix
     this._matrix = this._initialMatrix
       .clone()
@@ -691,9 +684,6 @@ L.Handler.PathTransform = L.Handler.extend({
     }
 
     this._apply();
-
-    //detecter inclinaison:
-    console.log(this._path);
     this._path.fire('scaleend', {
       layer: this._path, scale: this._scale.clone() });
   },

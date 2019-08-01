@@ -80,7 +80,8 @@ L.Handler.PathTransform = L.Handler.extend({
     this._centerLatlngInit = null;
     // handlers
     this._activeMarker   = null;
-    this._originMarker   = null;
+    this._ratioMarker   = null;
+    this._ratio = 1;
     this._rotationMarker = null;
     this._rotationOriginPt = null
     this._rotationStart = null;
@@ -416,6 +417,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._updateHandle();
     this._map.dragging.enable();
     this._fire("transformed");
+    this._calcRatio();
   },
   _fire(eventName,override){
     this._path.fire(eventName, {
@@ -563,14 +565,25 @@ L.Handler.PathTransform = L.Handler.extend({
       this._updateHandle();
     }
   },
+  _calcRatio(){
 
+    if(this._rotationMarker == null) return true;
+    // console.log(this._rotationMarker);
+    let point=this._rotationMarker._point;
+    //on cree un autre point fictif a 100/100 de ce rotation marker
+    this._ratioMarker= L.point(point.x+100, point.y+100);
+    let pointRotation= L.point(point.x, point.y);
+    let latlng = this._map.layerPointToLatLng(this._ratioMarker);
+    let latlng2 = this._rotationMarker._latlng;
+    this._ratio = Math.abs((latlng2.lat - latlng.lat) / (latlng2.lng - latlng.lng));
+  },
   _rotatePoint(latlng,angle){
     acos=Math.cos(angle);
     asin=Math.sin(angle);
     const [x,y]=latlng;
     xPrime=x*acos-y*asin;
     yPrime=x*asin+y*acos;
-    return [xPrime,yPrime]
+    return [xPrime*this._ratio,yPrime]
   },
 
   _updateHandle(use_temp_params){
@@ -613,7 +626,7 @@ L.Handler.PathTransform = L.Handler.extend({
 
     // console.log("angle",this._angle);
 
-    if(this.options.angleRotationInit!==0 || this.options.centerLatlngInit!== null){
+    if(this.options.angleRotationInit!==0 || this.options.centerLatlngInit!== null || 1){
       this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
       this._updateHandle();
     }
@@ -626,6 +639,7 @@ L.Handler.PathTransform = L.Handler.extend({
     
     // if(this.options.centering )
     await this._fire("initialished");
+    this._calcRatio();
   },
   /**
    * Change editing options
