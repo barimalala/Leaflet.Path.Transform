@@ -286,16 +286,20 @@ function update() {
         // centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
         // centerLatlngInit:{ lat: 45.7234181, lng: 5.088776800000005 },
         // 45.7234181, 5.088776800000005
-        // zoomInit:18,
+        zoomInit:19,
         // heightInit:0.001,
         // rectangle:{
         //   centerLatlng:{ lat: 22.53522469923445, lng: 113.90134692192075 },
         // },
         centering: true,
       }).enable();
-      layer.on("drag",(e)=>{
-        // console.log("drag",e.centerLatlng);
+      // layer.on("transformed",(e)=>{
+      //   console.log("drag",e);
+      // })
+      layer.on("ratioChanged",(e)=>{
+        console.log("ratioChanged",e);
       })
+      
     });
   });
 }

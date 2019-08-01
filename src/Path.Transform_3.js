@@ -576,6 +576,8 @@ L.Handler.PathTransform = L.Handler.extend({
     let latlng = this._map.layerPointToLatLng(this._ratioMarker);
     let latlng2 = this._rotationMarker._latlng;
     this._ratio = Math.abs((latlng2.lat - latlng.lat) / (latlng2.lng - latlng.lng));
+
+    this._fire("ratioChanged",{ratio:this._ratio});
   },
   _rotatePoint(latlng,angle){
     acos=Math.cos(angle);
@@ -624,22 +626,22 @@ L.Handler.PathTransform = L.Handler.extend({
       .on('dragstart', this._onDragStart, this)
       .on('dragend',   this._onDragEnd,   this);
 
-    // console.log("angle",this._angle);
+    if(this.options.centering){
+      //need to deplace rotation Marker before to set Ratio !!!
+      if(this.options.zoomInit!==0)
+        await map.flyTo(center_latlng, this.options.zoomInit)
+      else
+        await map.panTo(center_latlng);
+    }
 
     if(this.options.angleRotationInit!==0 || this.options.centerLatlngInit!== null || 1){
-      this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
-      this._updateHandle();
-    }
-    if(this.options.centering){
-      if(this.options.zoomInit!==0)
-        map.flyTo(center_latlng, this.options.zoomInit)
-      else
-        map.panTo(center_latlng);
+      await this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
+      await this._updateHandle();
     }
     
     // if(this.options.centering )
     await this._fire("initialished");
-    this._calcRatio();
+    await this._calcRatio();
   },
   /**
    * Change editing options
