@@ -612,8 +612,8 @@ L.Handler.PathTransform = L.Handler.extend({
     var map = this._map;
     map.on('load moveend', (e) => {
       this._calcRatio();
-      // this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
-      // this._updateHandle();
+      this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
+      this._updateHandle();
     });
     if(this._handlersGroup!== null){
       map.removeLayer(this._handlersGroup);
