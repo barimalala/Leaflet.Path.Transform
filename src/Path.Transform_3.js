@@ -607,6 +607,11 @@ L.Handler.PathTransform = L.Handler.extend({
     // return;
     // this._rectShape = this._rect.toGeoJSON();
     var map = this._map;
+    map.on('load moveend', (e) => {
+      this._calcRatio();
+      this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
+      this._updateHandle();
+    });
     if(this._handlersGroup!== null){
       map.removeLayer(this._handlersGroup);
     }
@@ -632,6 +637,8 @@ L.Handler.PathTransform = L.Handler.extend({
         await map.flyTo(center_latlng, this.options.zoomInit)
       else
         await map.panTo(center_latlng);
+    }else{
+      await this._calcRatio();
     }
 
     if(this.options.angleRotationInit!==0 || this.options.centerLatlngInit!== null || 1){
@@ -641,7 +648,6 @@ L.Handler.PathTransform = L.Handler.extend({
     
     // if(this.options.centering )
     await this._fire("initialished");
-    await this._calcRatio();
   },
   /**
    * Change editing options
