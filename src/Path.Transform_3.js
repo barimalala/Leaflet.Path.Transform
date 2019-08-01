@@ -575,9 +575,12 @@ L.Handler.PathTransform = L.Handler.extend({
     let pointRotation= L.point(point.x, point.y);
     let latlng = this._map.layerPointToLatLng(this._ratioMarker);
     let latlng2 = this._rotationMarker._latlng;
-    this._ratio = Math.abs((latlng2.lat - latlng.lat) / (latlng2.lng - latlng.lng));
+    let ratio = Math.abs((latlng2.lat - latlng.lat) / (latlng2.lng - latlng.lng));
 
-    this._fire("ratioChanged",{ratio:this._ratio});
+    if(this._ratio!==ratio){
+      this._ratio = ratio;
+      this._fire("ratioChanged",{ratio:this._ratio});
+    }
   },
   _rotatePoint(latlng,angle){
     acos=Math.cos(angle);
@@ -609,8 +612,8 @@ L.Handler.PathTransform = L.Handler.extend({
     var map = this._map;
     map.on('load moveend', (e) => {
       this._calcRatio();
-      this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
-      this._updateHandle();
+      // this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
+      // this._updateHandle();
     });
     if(this._handlersGroup!== null){
       map.removeLayer(this._handlersGroup);
@@ -634,20 +637,20 @@ L.Handler.PathTransform = L.Handler.extend({
     if(this.options.centering){
       //need to deplace rotation Marker before to set Ratio !!!
       if(this.options.zoomInit!==0)
-        await map.flyTo(center_latlng, this.options.zoomInit)
+        map.flyTo(center_latlng, this.options.zoomInit)
       else
-        await map.panTo(center_latlng);
+        map.panTo(center_latlng);
     }else{
-      await this._calcRatio();
+      this._calcRatio();
     }
 
     if(this.options.angleRotationInit!==0 || this.options.centerLatlngInit!== null || 1){
-      await this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
-      await this._updateHandle();
+      this._updateRect(this._width,this._height,this._angle,this._centerLatlngInit);
+      this._updateHandle();
     }
     
     // if(this.options.centering )
-    await this._fire("initialished");
+    this._fire("initialished");
   },
   /**
    * Change editing options
