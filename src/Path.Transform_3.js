@@ -249,6 +249,7 @@ L.Handler.PathTransform = L.Handler.extend({
       .off('mousemove', this._onScale,    this)
       .off('mouseup',   this._onScaleEnd, this);
     this._updateHandle();
+    this._map.dragging.enable();
     this._scaleOriginIndex=null;
     this._fire("transformed");
     this._fire("scaleend");
