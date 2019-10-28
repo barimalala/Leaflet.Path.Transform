@@ -11,7 +11,7 @@ var map = global.map = new L.Map('map', {
 })
 // .setView([5.088776800000005, 45.7234181], 19);
 // centerLatlngInit:{ lat: 45.7234181, lng: 5.088776800000005 },
-.setView([22.536, 113.9026], 18);
+.setView([22.536, 113.9026], 19);
 // .setView([113.9026,22.536], 17);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -283,7 +283,7 @@ function update() {
         rotation: rotation,
         uniformScaling: uniform,
         // angleRotationInit:Math.PI/6,
-        // centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
+        centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
         // centerLatlngInit:{ lat: 45.7234181, lng: 5.088776800000005 },
         // 45.7234181, 5.088776800000005
         zoomInit:19,
@@ -293,11 +293,11 @@ function update() {
         // },
         centering: true,
       }).enable();
-      // layer.on("transformed",(e)=>{
-      //   console.log("drag",e);
-      // })
+      layer.on("transformed",(e)=>{
+        console.log("drag",e);
+      })
       layer.on("ratioChanged",(e)=>{
-        console.log("ratioChanged",e);
+        console.log("ratioChanged++",e);
       })
       
     });

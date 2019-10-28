@@ -98,6 +98,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._width  = 0;
     this._height = 0;
     this._angle = 0;
+    this._direction = [];
   },
 
   _createHandlers: function(use_temp_params=false){
@@ -119,6 +120,7 @@ L.Handler.PathTransform = L.Handler.extend({
           .addTo(this._handlersGroup));
     });
     this._createRotationHandlers();
+    this._creacteDirection();
     // lat=this._center._latlng.lat+h;
     // lng=this._center._latlng.lng+w;
     // this._handlers.push(
@@ -326,6 +328,12 @@ L.Handler.PathTransform = L.Handler.extend({
     );
 
     this._handlers.push(this._rotationMarker);
+  },
+
+  _destroyDirection: function(){
+    if(this._direction!== null){
+      this._handlersGroup.removeLayer(this._direction);
+    }
   },
 
   _destroyRotationHandlers: function(){
@@ -592,7 +600,31 @@ L.Handler.PathTransform = L.Handler.extend({
     return [xPrime*this._ratio,yPrime]
   },
 
-  _updateHandle(use_temp_params){
+  _creacteDirection(){
+    // return false;
+    // height=(use_temp_params)?this._temp_height:this._height;
+    // width=(use_temp_params)?this._temp_width:this._width;
+    //on met la rectangle de direction a gauche au milieu
+    var map = this._map;
+    var latlngs = this._rect._latlngs[0];
+    var left = new L.LatLng(
+      (latlngs[0].lat + latlngs[2].lat) / 2,
+      (latlngs[0].lng + latlngs[2].lng) / 2);
+    // console.log("a");
+    [h,w] = this._rotatePoint([0,-this._width/2],this._angle);
+    // console.log("b");
+    var leftPoint= new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
+    // console.log("c",this._center._latlng.lat+h,this._center._latlng.lng+w,leftPoint);
+    [ha,wa] = this._rotatePoint([0,-this._width/2*1.2],this._angle);
+    // console.log("d");
+    var handlerPosition=new L.LatLng(this._center._latlng.lat+ha,this._center._latlng.lng+wa);
+    // console.log("e",h,w,this._center._latlng,leftPoint,handlerPosition);
+    this._direction = new L.Polyline([leftPoint, handlerPosition]).addTo(this._handlersGroup);
+    console.log("creatDirection");
+    this._handlers.push(this._direction);
+  },
+
+  _updateHandle(use_temp_params=false){
     //on met a jours le position des pointeurs
     var map = this._map;
     if(this._handlersGroup!== null){
