@@ -14,7 +14,7 @@ var map = global.map = new L.Map('map', {
 .setView([22.536, 113.9026], 19);
 // .setView([113.9026,22.536], 17);
 
-L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; ' +
     '<a href="http://osm.org/copyright">OSM</a> contributors',
     // crs: L.CRS.Simple,
@@ -282,22 +282,22 @@ function update() {
         scaling: scaling,
         rotation: rotation,
         uniformScaling: uniform,
-        // angleRotationInit:Math.PI/6,
+        // angleRotationInit:2*Math.PI/3,
         centerLatlngInit:{ lat: 22.53522469923445, lng: 113.90134692192075 },
         // centerLatlngInit:{ lat: 45.7234181, lng: 5.088776800000005 },
         // 45.7234181, 5.088776800000005
-        zoomInit:19,
+        zoomInit:20,
         // heightInit:0.001,
         // rectangle:{
         //   centerLatlng:{ lat: 22.53522469923445, lng: 113.90134692192075 },
         // },
         centering: true,
       }).enable();
-      layer.on("transformed",(e)=>{
-        console.log("drag",e);
-      })
-      layer.on("ratioChanged",(e)=>{
-        console.log("ratioChanged++",e);
+      // layer.on("transformed",(e)=>{
+      //   console.log("drag",e);
+      // })
+      layer.on("rotate",(e)=>{
+        console.log("rotate++",e.angle);
       })
       
     });

@@ -86,6 +86,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._rotationOriginPt = null
     this._rotationStart = null;
     this._dragStart = null;
+    this._dragStartD = null;
     this._origine_latlngs = null
     this._current_latlngs = null;
     this._current_center = null;
@@ -99,6 +100,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._height = 0;
     this._angle = 0;
     this._direction = [];
+    this._draggablePt =[];
   },
 
   _createHandlers: function(use_temp_params=false){
@@ -121,6 +123,7 @@ L.Handler.PathTransform = L.Handler.extend({
     });
     this._createRotationHandlers();
     this._creacteDirection();
+    this._createDraggable();
     // lat=this._center._latlng.lat+h;
     // lng=this._center._latlng.lng+w;
     // this._handlers.push(
@@ -460,9 +463,11 @@ L.Handler.PathTransform = L.Handler.extend({
     // pos.x=0;
     var previous = this._rotationStart;
     var origin   = this._rotationOriginPt;
+    // console.log(previous,origin,pos,this._angle);
     this._angle = Math.atan2(pos.y - origin.y, pos.x - origin.x) -
                   Math.atan2(previous.y - origin.y, previous.x - origin.x);
-                  // console.log(this._angle);
+    if(previous.y>origin.y)this._angle = this._angle+Math.PI;
+    // console.log(previous,origin,pos,this._angle);
     this._updateRect(this._width,this._height,this._angle);
     this._fire("rotate");
   },
@@ -591,13 +596,17 @@ L.Handler.PathTransform = L.Handler.extend({
       this._fire("ratioChanged",{ratio:this._ratio});
     }
   },
-  _rotatePoint(latlng,angle){
+  _rotatePoint(latlng,angle,projectToCenter=false){
+    if(projectToCenter)
+      latlng=[latlng[0]-projectToCenter.lat,latlng[1]-projectToCenter.lng]
     acos=Math.cos(angle);
     asin=Math.sin(angle);
     const [x,y]=latlng;
-    xPrime=x*acos-y*asin;
+    xPrime=(x*acos-y*asin)*this._ratio;
     yPrime=x*asin+y*acos;
-    return [xPrime*this._ratio,yPrime]
+    if(projectToCenter)
+      return [xPrime+projectToCenter.lat,yPrime+projectToCenter.lng]
+    return [xPrime,yPrime]
   },
 
   _creacteDirection(){
@@ -614,16 +623,96 @@ L.Handler.PathTransform = L.Handler.extend({
     [h,w] = this._rotatePoint([0,-this._width/2],this._angle);
     // console.log("b");
     var leftPoint= new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
+    var center = new L.LatLng(this._center._latlng.lat,this._center._latlng.lng);
     // console.log("c",this._center._latlng.lat+h,this._center._latlng.lng+w,leftPoint);
     [ha,wa] = this._rotatePoint([0,-this._width/2*1.2],this._angle);
     // console.log("d");
-    var handlerPosition=new L.LatLng(this._center._latlng.lat+ha,this._center._latlng.lng+wa);
+    // var handlerPosition=new L.LatLng(this._center._latlng.lat+ha,this._center._latlng.lng+wa);
+    var handlerPosition = map.layerPointToLatLng(
+      L.PathTransform.pointOnLine(
+        map.latLngToLayerPoint(center),
+        map.latLngToLayerPoint(leftPoint),
+        20)
+    );
+    var width=handlerPosition.lat-leftPoint.lat;
+    // console.log(map.latLngToLayerPoint(handlerPosition));
+    position = map.latLngToLayerPoint(handlerPosition);
+    // console.log(position);
+    var directions=[];
+    const [dWidth,dHeight,dPoint]=[5,30,7];
+    directions.push({x:position.x-dWidth,y:position.y-dHeight});
+    directions.push({x:position.x+dWidth,y:position.y-dHeight});
+    directions.push({x:position.x+dWidth,y:position.y+dHeight-dPoint});
+    directions.push({x:position.x+dWidth+dPoint,y:position.y+dHeight-dPoint});
+    directions.push({x:position.x,y:position.y+dHeight+dPoint});
+    directions.push({x:position.x-dWidth-dPoint,y:position.y+dHeight-dPoint});
+    directions.push({x:position.x-dWidth,y:position.y+dHeight-dPoint});
+    directions.push({x:position.x-dWidth,y:position.y-dHeight});
+    directions=directions.map(d=>{
+      let latLng=map.layerPointToLatLng(d);
+      return this._rotatePoint([latLng.lat,latLng.lng],this._angle,handlerPosition);
+    });
+    // console.log(directions);
+    // directions.push()
     // console.log("e",h,w,this._center._latlng,leftPoint,handlerPosition);
-    this._direction = new L.Polyline([leftPoint, handlerPosition]).addTo(this._handlersGroup);
-    console.log("creatDirection");
+    this._direction = new L.Polygon(directions,{fill: true, weight:1,color:'#3388FF'}).addTo(this._handlersGroup);
+    // this._direction
     this._handlers.push(this._direction);
   },
+  _createDraggable(){
+    var map = this._map;
+    var latlngs = this._rect._latlngs[0];
+    [h,w] = this._rotatePoint([this._height/2,this._width/2],this._angle);
+    var rightPoint= new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
+    var center = new L.LatLng(this._center._latlng.lat,this._center._latlng.lng);
+    var handlerPosition = map.layerPointToLatLng(
+      L.PathTransform.pointOnLine(
+        map.latLngToLayerPoint(center),
+        map.latLngToLayerPoint(rightPoint),
+        20)
+    );
 
+    this._draggablePt = new L.marker(handlerPosition,{
+      icon:L.divIcon({
+              className: 'my-div-icon icon-svg zoom-icon',
+              html: '<svg stroke="currentColor" fill="#fff" stroke-width="20" viewBox="0 0 512 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M475.9 246.2l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l54.9 54.9-161.8.5.5-161.8 54.9 54.9c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l54.9-54.9.5 161.8-161.8-.5 54.9-54.9c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6L80 270.5l161.8-.5-.5 161.8-54.9-54.9c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-54.9 54.9-.5-161.8 161.8.5-54.9 54.9c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.5-5.4 5.5-14.2 0-19.6z"></path></svg>'
+          })
+    }).addTo(this._handlersGroup);
+    this._draggablePt.on('mousedown',this._onDragStartD,this)
+    this._handlers.push(this._draggablePt);
+  },
+
+  _onDragStartD(evt){
+    var map = this._map;
+
+    map.dragging.disable();
+    this._destroyScaleHandlers();
+    this._path._map
+      .on('mousemove', this._onDragD,     this)
+      .on('mouseup',   this._onDragendD, this);
+  },
+  _onDragendD(evt){
+    this._updateHandle();
+    this._map.dragging.enable();
+    this._path._map
+      .off('mousemove', this._onDragD, this)
+      .off('mouseup',   this._onDragendD, this);
+    this._dragStartD=null;
+  },
+  _onDragD(evt){
+    this._dragStartD = this._dragStartD || evt.latlng;
+    var pos = evt.latlng;
+    // console.log(this._center);
+    this._current_center=L.latLng(
+      this._center._latlng.lat+(pos.lat-this._dragStartD.lat),
+      this._center._latlng.lng+(pos.lng-this._dragStartD.lng)
+      );
+    // console.log("dragging",this._current_center);
+    this._updateRect(this._width,this._height,this._angle,this._current_center);
+    this._fire("dragging",{
+      centerLatlng:this._current_center,
+    })
+  },
   _updateHandle(use_temp_params=false){
     //on met a jours le position des pointeurs
     var map = this._map;
