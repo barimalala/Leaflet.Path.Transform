@@ -687,6 +687,7 @@ L.Handler.PathTransform = L.Handler.extend({
 
     map.dragging.disable();
     this._destroyScaleHandlers();
+    this._fire("transformstart");
     this._path._map
       .on('mousemove', this._onDragD,     this)
       .on('mouseup',   this._onDragendD, this);
@@ -697,6 +698,8 @@ L.Handler.PathTransform = L.Handler.extend({
     this._path._map
       .off('mousemove', this._onDragD, this)
       .off('mouseup',   this._onDragendD, this);
+    this._fire("transformed");
+    this._calcRatio();
     this._dragStartD=null;
   },
   _onDragD(evt){
