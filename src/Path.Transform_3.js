@@ -715,6 +715,9 @@ L.Handler.PathTransform = L.Handler.extend({
     this._fire("dragging",{
       centerLatlng:this._current_center,
     })
+    this._fire("draggingCursor",{
+      centerLatlng:this._current_center,
+    })
   },
   _updateHandle(use_temp_params=false){
     //on met a jours le position des pointeurs
