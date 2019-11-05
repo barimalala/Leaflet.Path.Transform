@@ -186,6 +186,8 @@ L.Handler.PathTransform = L.Handler.extend({
     // return;
     var marker = evt.target;
     this._destroyRotationHandlers();
+    this._destroyDirection();
+    this._destroyDraggable();
     // console.log(marker);
     var map = this._map;
     map.dragging.disable();
@@ -336,6 +338,12 @@ L.Handler.PathTransform = L.Handler.extend({
   _destroyDirection: function(){
     if(this._direction!== null){
       this._handlersGroup.removeLayer(this._direction);
+    }
+  },
+
+  _destroyDraggable: function(){
+    if(this._draggablePt!== null){
+      this._handlersGroup.removeLayer(this._draggablePt);
     }
   },
 
