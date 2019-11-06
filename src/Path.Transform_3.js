@@ -601,10 +601,10 @@ L.Handler.PathTransform = L.Handler.extend({
 
     if(this._rotationMarker == null) return true;
     // console.log(this._rotationMarker);
-    let point=this._rotationMarker._point;
+    let point=this._map.latLngToLayerPoint(this._rotationMarker._latlng);
     //on cree un autre point fictif a 100/100 de ce rotation marker
     this._ratioMarker= L.point(point.x+100, point.y+100);
-    let pointRotation= L.point(point.x, point.y);
+    // let pointRotation= L.point(point.x, point.y);
     let latlng = this._map.layerPointToLatLng(this._ratioMarker);
     let latlng2 = this._rotationMarker._latlng;
     let ratio = Math.abs((latlng2.lat - latlng.lat) / (latlng2.lng - latlng.lng));
