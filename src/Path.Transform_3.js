@@ -167,6 +167,7 @@ L.Handler.PathTransform = L.Handler.extend({
     return marker;
    },
   _createHandler: function(latlng, type, index) {
+    var that=this;
     // console.log(this.options);
     var HandleClass = this.options.handleClass;
     // console.log(HandleClass);
@@ -178,10 +179,12 @@ L.Handler.PathTransform = L.Handler.extend({
         type:      type,
       })
     );
-    marker.on('mousedown', this._onScaleStart, this);
+    // marker.on('mousedown', this._onScaleStart, this);
+    marker.on('add',((elt)=>{
+      L.DomEvent.on(marker._path,'pointerdown',(evt=>that._onPointerScaleStart(evt,marker)),this);
+    }), this);
     return marker;
   },
-
   _onScaleStart:function(evt){
     // return;
     var marker = evt.target;
@@ -208,10 +211,63 @@ L.Handler.PathTransform = L.Handler.extend({
     this._fire("transformstart");
     this._fire("scalestart");
   },
+  _onPointerScaleStart:function(evt,marker){
+    // return;
+    // var marker = evt.target;
+    this._destroyRotationHandlers();
+    this._destroyDirection();
+    this._destroyDraggable();
+    // console.log(marker);
+    var map = this._map;
+    map.dragging.disable();
+    this._activeMarker = marker;
+    this._scaleOriginIndex=(marker.options.index + 2) % 4;
+    this._scaleOriginLatlng = this._handlers[this._scaleOriginIndex].getLatLng();
+    // console.log(this._handlers[this._scaleOriginIndex]);
+    // console.log(this._center);
+    // console.log(this._activeMarker);
+    this._origdistX = this._activeMarker._latlng.lng-this._center._latlng.lng;
+    this._origdistY = this._activeMarker._latlng.lat-this._center._latlng.lat;
+    [this._origdistX,this._origdistY] =this._rotatePoint([this._origdistX,this._origdistY],this._angle);
 
+    L.DomEvent.off(this._map._container,'pointermove',this._onPointerScale,this);
+    L.DomEvent.off(this._map._container,'pointerup',this._onPointerScaleEnd,this);
+    L.DomEvent.on(this._map._container,'pointermove',this._onPointerScale,this);
+    L.DomEvent.on(this._map._container,'pointerup',this._onPointerScaleEnd,this);
+
+    this._fire("transformstart");
+    this._fire("scalestart");
+  },
+  _onPointerScale:function(evt){
+    evt.latlng = this._map.mouseEventToLatLng(evt);
+    distX = evt.latlng.lng-this._center._latlng.lng;
+    disty = evt.latlng.lat-this._center._latlng.lat;
+    [distX,disty] =this._rotatePoint([distX,disty],this._angle);
+    ratioX=(1+distX/this._origdistX)/2;
+    ratioY=(1+disty/this._origdistY)/2;
+    // console.log("ratio de reduction",ratioX,ratioY);
+    this._temp_width = this._width*ratioX;
+    this._temp_height = this._height*ratioY;
+    // console.log("_scaleOriginIndex",this._scaleOriginIndex);
+    // console.log("width",this._temp_width);
+
+    this._updateRect(this._temp_width,this._temp_height);
+    // if(console.log(this._handlers[2].setLatLng));
+    this._handlers[0].setLatLng(this._current_latlngs[0]);
+    this._handlers[1].setLatLng(this._current_latlngs[1]);
+    this._handlers[2].setLatLng(this._current_latlngs[2]);
+    this._handlers[3].setLatLng(this._current_latlngs[3]);
+    //on met a jours les marker !
+    // this._updateHandle(true);
+    this._fire("scale",{
+      width:this._temp_width,
+      height:this._temp_height,
+      centerLatlng:this._current_center,
+      latlng:this._current_latlngs
+    });
+  },
   _onScale:function(evt){
     //on recuper l'ecart par rapport a la hauteur et a la longueur
-    // console.log(evt);
     distX = evt.latlng.lng-this._center._latlng.lng;
     disty = evt.latlng.lat-this._center._latlng.lat;
     [distX,disty] =this._rotatePoint([distX,disty],this._angle);
@@ -255,6 +311,29 @@ L.Handler.PathTransform = L.Handler.extend({
     this._map
       .off('mousemove', this._onScale,    this)
       .off('mouseup',   this._onScaleEnd, this);
+    this._updateHandle();
+    this._map.dragging.enable();
+    this._scaleOriginIndex=null;
+    this._fire("transformed");
+    this._fire("scaleend");
+  },
+  _onPointerScaleEnd:function(evt){
+    evt.latlng = this._map.mouseEventToLatLng(evt);
+    distX = evt.latlng.lng-this._center._latlng.lng;
+    disty = evt.latlng.lat-this._center._latlng.lat;
+    [distX,disty] =this._rotatePoint([distX,disty],this._angle);
+    // console.log("distance scaling",)
+    ratioX=(1+distX/this._origdistX)/2;
+    ratioY=(1+disty/this._origdistY)/2;
+    this._width = this._width*ratioX;
+    this._height = this._height*ratioY;
+
+    // this._width = this._width*distX/this._origdistX;
+    // this._height = this._height*disty/this._origdistY;
+
+    this._updateRect(this._width,this._height);
+    L.DomEvent.off(this._map._container,'pointermove',this._onPointerScale,this);
+    L.DomEvent.off(this._map._container,'pointerup',this._onPointerScaleEnd,this);
     this._updateHandle();
     this._map.dragging.enable();
     this._scaleOriginIndex=null;
