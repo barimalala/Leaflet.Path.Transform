@@ -4,6 +4,22 @@
  * Marker handler
  * @extends {L.CircleMarker}``
  */
+ var END = {
+  mousedown:     'mouseup',
+  touchstart:    'touchend',
+  pointerdown:   'pointerup',
+  MSPointerDown: 'pointerup',
+  click: 'touchend',
+};
+
+var MOVE = {
+  mousedown:     'mousemove',
+  touchstart:    'touchmove',
+  pointerdown:   'pointermove',
+  MSPointerDown: 'touchmove',
+  click: 'touchmove'
+};
+
 L.PathTransform.Handle = L.CircleMarker.extend({
   options: {
     className: 'leaflet-path-transform-handler'
@@ -101,6 +117,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._angle = 0;
     this._direction = [];
     this._draggablePt =[];
+    this._evtType=null;
   },
 
   _createHandlers: function(use_temp_params=false){
@@ -181,7 +198,7 @@ L.Handler.PathTransform = L.Handler.extend({
     );
     // marker.on('mousedown', this._onScaleStart, this);
     marker.on('add',((elt)=>{
-      L.DomEvent.on(marker._path,'pointerdown',(evt=>that._onPointerScaleStart(evt,marker)),this);
+      L.DomEvent.on(marker._path,'pointerdown mousedown',(evt=>that._onPointerScaleStart(evt,marker)),this);
     }), this);
     return marker;
   },
@@ -214,6 +231,7 @@ L.Handler.PathTransform = L.Handler.extend({
   _onPointerScaleStart:function(evt,marker){
     // return;
     // var marker = evt.target;
+    this._evtType=this._evtType||evt.type;
     this._destroyRotationHandlers();
     this._destroyDirection();
     this._destroyDraggable();
@@ -230,10 +248,10 @@ L.Handler.PathTransform = L.Handler.extend({
     this._origdistY = this._activeMarker._latlng.lat-this._center._latlng.lat;
     [this._origdistX,this._origdistY] =this._rotatePoint([this._origdistX,this._origdistY],this._angle);
 
-    L.DomEvent.off(this._map._container,'pointermove',this._onPointerScale,this);
-    L.DomEvent.off(this._map._container,'pointerup',this._onPointerScaleEnd,this);
-    L.DomEvent.on(this._map._container,'pointermove',this._onPointerScale,this);
-    L.DomEvent.on(this._map._container,'pointerup',this._onPointerScaleEnd,this);
+    L.DomEvent.off(this._map._container,MOVE[this._evtType],this._onPointerScale,this);
+    L.DomEvent.off(this._map._container,END[this._evtType],this._onPointerScaleEnd,this);
+    L.DomEvent.on(this._map._container,MOVE[this._evtType],this._onPointerScale,this);
+    L.DomEvent.on(this._map._container,END[this._evtType],this._onPointerScaleEnd,this);
 
     this._fire("transformstart");
     this._fire("scalestart");
@@ -332,8 +350,8 @@ L.Handler.PathTransform = L.Handler.extend({
     // this._height = this._height*disty/this._origdistY;
 
     this._updateRect(this._width,this._height);
-    L.DomEvent.off(this._map._container,'pointermove',this._onPointerScale,this);
-    L.DomEvent.off(this._map._container,'pointerup',this._onPointerScaleEnd,this);
+    L.DomEvent.off(this._map._container,MOVE[this._evtType],this._onPointerScale,this);
+    L.DomEvent.off(this._map._container,END[this._evtType],this._onPointerScaleEnd,this);
     this._updateHandle();
     this._map.dragging.enable();
     this._scaleOriginIndex=null;
@@ -377,6 +395,7 @@ L.Handler.PathTransform = L.Handler.extend({
    * Rotation marker and small connectin handle
    */
   _createRotationHandlers: function() {
+    var that=this;
     // return;
     var map     = this._map;
     var latlngs = this._rect._latlngs[0];
@@ -404,17 +423,18 @@ L.Handler.PathTransform = L.Handler.extend({
     this._handleLine = new L.Polyline([topPoint, handlerPosition],
       this.options.rotateHandleOptions).addTo(this._handlersGroup);
     var RotateHandleClass = this.options.rotateHandleClass;
-    this._rotationMarker = new L.marker(icoPosition,{
-      icon:L.divIcon({
+    var Icon=L.divIcon({
               className: 'rotation-icon',
               iconSize: [20, 20],
               html: '<svg stroke="#3388FF" fill="#3388FF" stroke-width="0" viewBox="0 0 512 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg>'
           })
-      })
+    this._rotationMarker = new L.marker(icoPosition,{icon:Icon})
     // this._rotationMarker = new RotateHandleClass(handlerPosition,
     //   this.options.handlerOptions)
-      .addTo(this._handlersGroup)
-      .on('mousedown', this._onRotateStart, this);
+      .addTo(this._handlersGroup);
+      // .on('mousedown', this._onRotateStart, this);
+      // console.log(this._rotationMarker._icon);
+      L.DomEvent.on(this._rotationMarker._icon,'mousedown pointerdown',that._onPointerRotateStart,this);
     this._rotationStart=this._rotationMarker;
     this._rotationOrigin = new L.LatLng(
       (topPoint.lat + bottom.lat) / 2,
@@ -502,6 +522,7 @@ L.Handler.PathTransform = L.Handler.extend({
     this._destroyScaleHandlers();
     this._fire("transformstart");
     // console.log(evt);
+    // alert("dragStart");
     this._path._map.on('mousemove', this._onDrag,this)
   },
 
@@ -520,6 +541,7 @@ L.Handler.PathTransform = L.Handler.extend({
   },
 
   _onDragEnd: function(evt){
+    // alert("dragEnd");
     this._dragStart=null;
     var rect = this._rect;
     this._path._map.off('mousemove', this._onDrag,     this)
@@ -553,6 +575,47 @@ L.Handler.PathTransform = L.Handler.extend({
       .on('mouseup',   this._onRotateEnd, this);
     this._fire("transformstart");
     this._fire("rotatestart");
+  },
+
+  _onPointerRotateStart: function(evt) {
+    this._evtType=this._evtType||evt.type;
+    // L.DomEvent.off(this._rotationMarker._icon,'mousedown touchstart pointerdown',this._onPointerRotateStart,this);
+    console.log("startRotate");
+    var map = this._map;
+    map.dragging.disable();
+    this._destroyScaleHandlers();
+
+    this._rotationOriginPt = map.latLngToLayerPoint(this._getRotationOrigin());
+    this._rotationStart    = this._path._map.mouseEventToLayerPoint(evt);
+    this._rotationStart.x=this._rotationOriginPt.x;
+    L.DomEvent.on(this._map._container,MOVE[this._evtType],this._onPointerRotate,this);
+    L.DomEvent.on(this._map._container,END[this._evtType],this._onPointerRotateEnd,this);
+    this._fire("transformstart");
+    this._fire("rotatestart");
+  },
+
+  _onPointerRotate(evt){
+    var pos = this._path._map.mouseEventToLayerPoint(evt);
+    // alert("ortation");
+    // pos.x=0;
+    var previous = this._rotationStart;
+    var origin   = this._rotationOriginPt;
+    // console.log(previous,origin,pos,this._angle);
+    this._angle = Math.atan2(pos.y - origin.y, pos.x - origin.x) -
+                  Math.atan2(previous.y - origin.y, previous.x - origin.x);
+    if(previous.y>origin.y)this._angle = this._angle+Math.PI;
+    // console.log(previous,origin,pos,this._angle);
+    this._updateRect(this._width,this._height,this._angle);
+    this._fire("rotate");
+  },
+
+  _onPointerRotateEnd(evt){
+    this._updateHandle();
+    this._map.dragging.enable();
+    L.DomEvent.off(this._map._container,MOVE[this._evtType],this._onPointerRotate,this);
+    L.DomEvent.off(this._map._container,END[this._evtType],this._onPointerRotateEnd,this);
+    this._fire("rotateend");
+    this._fire("transformed");
   },
 
   _onRotate(evt){
@@ -776,7 +839,8 @@ L.Handler.PathTransform = L.Handler.extend({
               html: '<svg stroke="#3388FF" fill="#3388FF" stroke-width="10" viewBox="0 0 512 512" height="25" width="25" xmlns="http://www.w3.org/2000/svg"><path d="M475.9 246.2l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l54.9 54.9-161.8.5.5-161.8 54.9 54.9c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l54.9-54.9.5 161.8-161.8-.5 54.9-54.9c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6L80 270.5l161.8-.5-.5 161.8-54.9-54.9c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-54.9 54.9-.5-161.8 161.8.5-54.9 54.9c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.5-5.4 5.5-14.2 0-19.6z"></path></svg>'
           })
     }).addTo(this._handlersGroup);
-    this._draggablePt.on('mousedown',this._onDragStartD,this)
+    // this._draggablePt.on('mousedown',this._onDragStartD,this)
+    L.DomEvent.on(this._draggablePt._icon,'mousedown pointerdown',this._onPointerDragStartD,this);
     this._handlers.push(this._draggablePt);
   },
 
@@ -790,6 +854,15 @@ L.Handler.PathTransform = L.Handler.extend({
       .on('mousemove', this._onDragD,     this)
       .on('mouseup',   this._onDragendD, this);
   },
+  _onPointerDragStartD(evt){
+    var map = this._map;
+    this._evtType=this._evtType||evt.type;
+    map.dragging.disable();
+    this._destroyScaleHandlers();
+    this._fire("transformstart");
+    L.DomEvent.on(this._map._container,MOVE[this._evtType],this._onPointerDragD,this);
+    L.DomEvent.on(this._map._container,END[this._evtType],this._onPointerDragendD,this);
+  },
   _onDragendD(evt){
     this._updateHandle();
     this._map.dragging.enable();
@@ -801,6 +874,36 @@ L.Handler.PathTransform = L.Handler.extend({
     this._dragStartD=null;
   },
   _onDragD(evt){
+    this._dragStartD = this._dragStartD || evt.latlng;
+    var pos = evt.latlng;
+    // console.log(this._center);
+    this._current_center=L.latLng(
+      this._center._latlng.lat+(pos.lat-this._dragStartD.lat),
+      this._center._latlng.lng+(pos.lng-this._dragStartD.lng)
+      );
+    // console.log("dragging",this._current_center);
+    this._updateRect(this._width,this._height,this._angle,this._current_center);
+    this._fire("dragging",{
+      centerLatlng:this._current_center,
+    })
+    this._fire("draggingCursor",{
+      centerLatlng:this._current_center,
+    })
+  },
+  _onPointerDragendD(evt){
+    this._updateHandle();
+    this._map.dragging.enable();
+    // this._path._map
+      // .off('mousemove', this._onDragD, this)
+      // .off('mouseup',   this._onDragendD, this);
+    L.DomEvent.off(this._map._container,MOVE[this._evtType],this._onPointerDragD,this);
+    L.DomEvent.off(this._map._container,END[this._evtType],this._onPointerDragendD,this);
+    this._fire("transformed");
+    this._calcRatio();
+    this._dragStartD=null;
+  },
+  _onPointerDragD(evt){
+    evt.latlng = this._map.mouseEventToLatLng(evt);
     this._dragStartD = this._dragStartD || evt.latlng;
     var pos = evt.latlng;
     // console.log(this._center);

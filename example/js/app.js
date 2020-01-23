@@ -297,7 +297,7 @@ function update() {
       //   console.log("drag",e);
       // })
       layer.on("rotate",(e)=>{
-        console.log("rotate++",e.angle);
+        // console.log("rotate++",e.angle);
       })
       
     });
