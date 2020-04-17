@@ -405,16 +405,19 @@ L.Handler.PathTransform = L.Handler.extend({
     //top point est au milieu au dessus du centre
     [h,w]=this._rotatePoint([this._height/2,0],this._angle);
     var topPoint = new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
+    let layerPointBottom=map.latLngToLayerPoint(bottom);
+    let layerPointTop=map.latLngToLayerPoint(topPoint);
+    if( Math.abs(layerPointBottom.x-layerPointTop.x)<=5 && Math.abs(layerPointBottom.y-layerPointTop.y)<=5){
+      return
+    }
+
     var handlerPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(
-        map.latLngToLayerPoint(bottom),
-        map.latLngToLayerPoint(topPoint),10)
+      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,10)
     );
     var icoPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(
-        map.latLngToLayerPoint(bottom),
-        map.latLngToLayerPoint(topPoint),20)
+      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,20)
     );
+    // console.log("outstwo inde");
     //incliner le handler
     // [h,w]=this._rotatePoint([this._height/2*1.2,0],this._angle);
     // handlerPosition.lat=this._center._latlng.lat+h;
@@ -442,6 +445,7 @@ L.Handler.PathTransform = L.Handler.extend({
     );
 
     this._handlers.push(this._rotationMarker);
+    // console.log("outsinde");
   },
 
   _destroyDirection: function(){
@@ -788,11 +792,14 @@ L.Handler.PathTransform = L.Handler.extend({
     [ha,wa] = this._rotatePoint([0,-this._width/2*1.2],this._angle);
     // console.log("d");
     // var handlerPosition=new L.LatLng(this._center._latlng.lat+ha,this._center._latlng.lng+wa);
+
+    let layerPointCenter=map.latLngToLayerPoint(center);
+    let layerPointLeft=map.latLngToLayerPoint(leftPoint);
+    if( Math.abs(layerPointCenter.x-layerPointLeft.x)<=5 && Math.abs(layerPointCenter.y-layerPointLeft.y)<=5){
+      return;
+    }
     var handlerPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(
-        map.latLngToLayerPoint(center),
-        map.latLngToLayerPoint(leftPoint),
-        20)
+      L.PathTransform.pointOnLine(layerPointCenter,layerPointLeft,20)
     );
     var width=handlerPosition.lat-leftPoint.lat;
     // console.log(map.latLngToLayerPoint(handlerPosition));
@@ -825,13 +832,16 @@ L.Handler.PathTransform = L.Handler.extend({
     [h,w] = this._rotatePoint([this._height/2,this._width/2],this._angle);
     var rightPoint= new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
     var center = new L.LatLng(this._center._latlng.lat,this._center._latlng.lng);
+
+    let layerPointCenter=map.latLngToLayerPoint(center);
+    let layerPointRight=map.latLngToLayerPoint(rightPoint);
+    if( Math.abs(layerPointCenter.x-layerPointRight.x)==0 && Math.abs(layerPointCenter.y-layerPointRight.y)==0){
+      layerPointRight.y +=1;
+    }
     var handlerPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(
-        map.latLngToLayerPoint(center),
-        map.latLngToLayerPoint(rightPoint),
+      L.PathTransform.pointOnLine(layerPointCenter,layerPointRight,
         20)
     );
-
     this._draggablePt = new L.marker(handlerPosition,{
       icon:L.divIcon({
               className: 'zoom-icon',

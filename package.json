@@ -1,6 +1,6 @@
 {
   "name": "leaflet-path-transform-proportionnal-scalable-touch",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Scale/rotate/move plugin for leaflet vector layers ",
   "main": "index.js",
   "scripts": {
