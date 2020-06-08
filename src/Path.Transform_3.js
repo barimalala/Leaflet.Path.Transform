@@ -75,12 +75,12 @@ L.Handler.PathTransform = L.Handler.extend({
       centering:false,
 
       handlerOptions: {
-        radius:      5,
-        fillColor:   '#ffffff',
-        color:       '#202020',
+        radius:      21,
+        fillColor:   '#0E203A',
+        color:       '#fff',
         fillOpacity: 1,
-        weight:      2,
-        opacity:     0.7,
+        weight:      3,
+        opacity:     1,
         setCursor:   true
       },
       transform:     true,
