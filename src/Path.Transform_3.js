@@ -79,7 +79,7 @@ L.Handler.PathTransform = L.Handler.extend({
         fillColor:   '#0E203A',
         color:       '#fff',
         fillOpacity: 1,
-        weight:      3,
+        weight:      4,
         opacity:     1,
         setCursor:   true
       },
