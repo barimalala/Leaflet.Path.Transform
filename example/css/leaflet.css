@@ -264,8 +264,7 @@
 .leaflet-control-layers-toggle {
 	background-position: 50% 50%;
 	background-repeat: no-repeat;
-	display: none;
-	/* display: block; */
+	display: block;
 	}
 .leaflet-bar a:hover {
 	background-color: #f4f4f4;
