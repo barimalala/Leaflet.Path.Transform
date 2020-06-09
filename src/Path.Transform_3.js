@@ -427,8 +427,8 @@ L.Handler.PathTransform = L.Handler.extend({
     // handlerPosition.lat=this._center._latlng.lat+h;
     // handlerPosition.lng=this._center._latlng.lng+w;
     // console.log("here");
-    // this._handleLine = new L.Polyline([topPoint, handlerPosition],
-    //   this.options.rotateHandleOptions).addTo(this._handlersGroup);
+    this._handleLine = new L.Polyline([topPoint, handlerPosition],
+      this.options.rotateHandleOptions).addTo(this._handlersGroup);
     var RotateHandleClass = this.options.rotateHandleClass;
     var Icon=L.divIcon({
               className: 'rotation-icon',
