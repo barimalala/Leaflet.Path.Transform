@@ -6390,16 +6390,16 @@ var Layers = Control.extend({
 			}
 		}
 
-		var link = this._layersLink = create$1('a', className + '-toggle', container);
-		link.href = '#';
-		link.title = 'Layers';
+		// var link = this._layersLink = create$1('a', className + '-toggle', container);
+		// link.href = '#';
+		// link.title = 'Layers';
 
-		if (touch) {
-			on(link, 'click', stop);
-			on(link, 'click', this.expand, this);
-		} else {
-			on(link, 'focus', this.expand, this);
-		}
+		// if (touch) {
+		// 	on(link, 'click', stop);
+		// 	on(link, 'click', this.expand, this);
+		// } else {
+		// 	on(link, 'focus', this.expand, this);
+		// }
 
 		if (!collapsed) {
 			this.expand();
