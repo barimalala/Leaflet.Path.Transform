@@ -9067,7 +9067,8 @@ var Path = Layer.extend({
 
 		// @option color: String = '#3388ff'
 		// Stroke color
-		color: '#3388ff',
+		color: 'transparent',
+		// color: '#3388ff',
 
 		// @option weight: Number = 3
 		// Stroke width in pixels
