@@ -7014,12 +7014,12 @@ var attribution = function (options) {
 	return new Attribution(options);
 };
 
-// Control.Layers = Layers;
+Control.Layers = Layers;
 Control.Zoom = Zoom;
 Control.Scale = Scale;
 Control.Attribution = Attribution;
 
-// control.layers = layers;
+control.layers = layers;
 control.zoom = zoom;
 control.scale = scale;
 control.attribution = attribution;
