@@ -403,7 +403,8 @@ L.Handler.PathTransform = L.Handler.extend({
     var bottom   = new L.LatLng(this._center._latlng.lat,this._center._latlng.lng);
     // hehe, top is a reserved word
     //top point est au milieu au dessus du centre
-    [h,w]=this._rotatePoint([this._height/2,0],this._angle);
+    // [h,w]=this._rotatePoint([this._height/2,0],this._angle);
+    [h,w]=this._rotatePoint([this._width],this._angle);
     var topPoint = new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
     let layerPointBottom=map.latLngToLayerPoint(bottom);
     let layerPointTop=map.latLngToLayerPoint(topPoint);
@@ -840,9 +841,9 @@ L.Handler.PathTransform = L.Handler.extend({
     // console.log(directions);
     // directions.push()
     // console.log("e",h,w,this._center._latlng,leftPoint,handlerPosition);
-    this._direction = new L.Polygon(directions,{fill: true, weight:1,color:'#fff'}).addTo(this._handlersGroup);
-    // this._direction
-    this._handlers.push(this._direction);
+    // this._direction = new L.Polygon(directions,{fill: true, weight:1,color:'#fff'}).addTo(this._handlersGroup);
+    // // this._direction
+    // this._handlers.push(this._direction);
   },
   _createDraggable(){
     var map = this._map;
@@ -860,13 +861,17 @@ L.Handler.PathTransform = L.Handler.extend({
       L.PathTransform.pointOnLine(layerPointCenter,layerPointRight,
         20)
     );
-    this._draggablePt = new L.marker(handlerPosition,{
-      icon:L.divIcon({
-              className: 'zoom-icon',
-              iconSize: [25, 25],
-              html: '<svg stroke="#fff" fill="#fff" stroke-width="10" viewBox="0 0 512 512" height="25" width="25" xmlns="http://www.w3.org/2000/svg"><path d="M475.9 246.2l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l54.9 54.9-161.8.5.5-161.8 54.9 54.9c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l54.9-54.9.5 161.8-161.8-.5 54.9-54.9c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6L80 270.5l161.8-.5-.5 161.8-54.9-54.9c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-54.9 54.9-.5-161.8 161.8.5-54.9 54.9c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.5-5.4 5.5-14.2 0-19.6z"></path></svg>'
-          })
-    }).addTo(this._handlersGroup);
+    // this._draggablePt = new L.marker(handlerPosition,{
+    //   icon:L.divIcon({
+    //           className: 'zoom-icon',
+    //           iconSize: [25, 25],
+    //           html: '<svg stroke="#fff" fill="#fff" stroke-width="10" viewBox="0 0 512 512" height="25" width="25" xmlns="http://www.w3.org/2000/svg"><path d="M475.9 246.2l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l54.9 54.9-161.8.5.5-161.8 54.9 54.9c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l54.9-54.9.5 161.8-161.8-.5 54.9-54.9c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6L80 270.5l161.8-.5-.5 161.8-54.9-54.9c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-54.9 54.9-.5-161.8 161.8.5-54.9 54.9c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.5-5.4 5.5-14.2 0-19.6z"></path></svg>'
+    //       })
+    // }).addTo(this._handlersGroup);
+
+    this._draggablePt = new L.marker(handlerPosition).addTo(this._handlersGroup);
+
+    
     // this._draggablePt.on('mousedown',this._onDragStartD,this)
     L.DomEvent.on(this._draggablePt._icon,'mousedown pointerdown',this._onPointerDragStartD,this);
     this._handlers.push(this._draggablePt);
