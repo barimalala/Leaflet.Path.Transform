@@ -6291,7 +6291,7 @@ var Layers = Control.extend({
 
 	onAdd: function (map) {
 		// this._initLayout();
-		this._update();
+		// this._update();
 
 		this._map = map;
 		map.on('zoomend', this._checkDisabledLayers, this);
