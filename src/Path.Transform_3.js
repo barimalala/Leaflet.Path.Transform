@@ -403,7 +403,11 @@ L.Handler.PathTransform = L.Handler.extend({
     var bottom   = new L.LatLng(this._center._latlng.lat,this._center._latlng.lng);
     // hehe, top is a reserved word
     //top point est au milieu au dessus du centre
-    [h,w]=this._rotatePoint([this._height/2,0],this._angle);
+    // [h,w]=this._rotatePoint([this._height/2,0],this._angle);
+
+    // top right
+    [h,w]=this._rotatePoint([this._height/2,this._width/2],this._angle);
+    
     var topPoint = new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
     let layerPointBottom=map.latLngToLayerPoint(bottom);
     let layerPointTop=map.latLngToLayerPoint(topPoint);
