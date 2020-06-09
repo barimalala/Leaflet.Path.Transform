@@ -7014,7 +7014,7 @@ var attribution = function (options) {
 	return new Attribution(options);
 };
 
-Control.Layers = Layers;
+// Control.Layers = Layers;
 Control.Zoom = Zoom;
 Control.Scale = Scale;
 Control.Attribution = Attribution;
