@@ -6290,7 +6290,7 @@ var Layers = Control.extend({
 	},
 
 	onAdd: function (map) {
-		this._initLayout();
+		// this._initLayout();
 		this._update();
 
 		this._map = map;
@@ -10681,9 +10681,9 @@ var DivOverlay = Layer.extend({
 	onAdd: function (map) {
 		this._zoomAnimated = map._zoomAnimated;
 
-		// if (!this._container) {
-		// 	this._initLayout();
-		// }
+		if (!this._container) {
+			this._initLayout();
+		}
 
 		if (map._fadeAnimated) {
 			setOpacity(this._container, 0);
