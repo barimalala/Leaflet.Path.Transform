@@ -6290,8 +6290,8 @@ var Layers = Control.extend({
 	},
 
 	onAdd: function (map) {
-		// this._initLayout();
-		// this._update();
+		this._initLayout();
+		this._update();
 
 		this._map = map;
 		map.on('zoomend', this._checkDisabledLayers, this);
@@ -7019,7 +7019,7 @@ Control.Zoom = Zoom;
 Control.Scale = Scale;
 Control.Attribution = Attribution;
 
-control.layers = layers;
+// control.layers = layers;
 control.zoom = zoom;
 control.scale = scale;
 control.attribution = attribution;
