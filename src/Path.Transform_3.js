@@ -406,7 +406,7 @@ L.Handler.PathTransform = L.Handler.extend({
     // [h,w]=this._rotatePoint([this._height/2,0],this._angle);
 
     // top right
-    [h,w]=this._rotatePoint([this._height/2.4,this._width/2.4],this._angle);
+    [h,w]=this._rotatePoint([this._height/2,this._width/2],this._angle);
     
     var topPoint = new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
     let layerPointBottom=map.latLngToLayerPoint(bottom);
@@ -419,7 +419,7 @@ L.Handler.PathTransform = L.Handler.extend({
       L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,10)
     );
     var icoPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,20)
+      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,50)
     );
     // console.log("outstwo inde");
     //incliner le handler
