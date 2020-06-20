@@ -9067,7 +9067,7 @@
 	
 			// @option color: String = '#3388ff'
 			// Stroke color
-			color: 'red',
+			color: 'transparent',
 			// color: '#3388ff',
 	
 			// @option weight: Number = 3
