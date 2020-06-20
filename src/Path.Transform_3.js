@@ -419,7 +419,7 @@ L.Handler.PathTransform = L.Handler.extend({
       L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,10)
     );
     var icoPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,50)
+      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,20)
     );
     // console.log("outstwo inde");
     //incliner le handler
@@ -862,7 +862,7 @@ L.Handler.PathTransform = L.Handler.extend({
     }
     var handlerPosition = map.layerPointToLatLng(
       L.PathTransform.pointOnLine(layerPointCenter,layerPointRight,
-        20)
+        50)
     );
     this._draggablePt = new L.marker(handlerPosition,{
       icon:L.divIcon({
