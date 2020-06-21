@@ -1,10 +1,9 @@
 
-
 /**
  * Marker handler
  * @extends {L.CircleMarker}``
  */
- var END = {
+var END = {
   mousedown:     'mouseup',
   touchstart:    'touchend',
   pointerdown:   'pointerup',
@@ -75,12 +74,12 @@ L.Handler.PathTransform = L.Handler.extend({
       centering:false,
 
       handlerOptions: {
-        radius:      10,
-        fillColor:   '#0E203A',
-        color:       '#fff',
+        radius:      5,
+        fillColor:   '#ffffff',
+        color:       '#202020',
         fillOpacity: 1,
-        weight:      4,
-        opacity:     1,
+        weight:      2,
+        opacity:     0.7,
         setCursor:   true
       },
       transform:     true,
@@ -403,11 +402,7 @@ L.Handler.PathTransform = L.Handler.extend({
     var bottom   = new L.LatLng(this._center._latlng.lat,this._center._latlng.lng);
     // hehe, top is a reserved word
     //top point est au milieu au dessus du centre
-    // [h,w]=this._rotatePoint([this._height/2,0],this._angle);
-
-    // top right
     [h,w]=this._rotatePoint([this._height/2,0],this._angle);
-    
     var topPoint = new L.LatLng(this._center._latlng.lat+h,this._center._latlng.lng+w);
     let layerPointBottom=map.latLngToLayerPoint(bottom);
     let layerPointTop=map.latLngToLayerPoint(topPoint);
@@ -419,7 +414,7 @@ L.Handler.PathTransform = L.Handler.extend({
       L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,10)
     );
     var icoPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,30)
+      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,20)
     );
     // console.log("outstwo inde");
     //incliner le handler
@@ -432,26 +427,8 @@ L.Handler.PathTransform = L.Handler.extend({
     var RotateHandleClass = this.options.rotateHandleClass;
     var Icon=L.divIcon({
               className: 'rotation-icon',
-              iconSize: [36, 36],
-              // html: '<svg stroke="#fff" fill="#fff" stroke-width="0" viewBox="0 0 512 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg>'
-              html: `
-              <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" width="36.1" height="36.1" viewBox="0 0 36.1 36.1">
-              <circle cx="18.05" cy="18.05" r="18" fill="#fff" stroke="#000" stroke-miterlimit="10" stroke-width="0.1px"/>
-              <g id="modal">
-              <g id="map">
-              <g id="main_controller" data-name="main controller">
-              <g id="rotate">
-              <g id="rotate-cw">
-              <g id="Group">
-              <path id="Combined-Shape" fill="#112648" fill-rule="evenodd" d="M10.42,14.87h0l.06,0h0l0,0,0,0,3.89,1.49a.84.84,0,0,0,.69-1.52l-.09,0-1.93-.74,2.17-.89a5.42,5.42,0,1,1-3.21,4.81A.84.84,0,1,0,10.44,18a7.08,7.08,0,1,0,4.44-6.38l-.22.09-2.3.94.8-2.08a.83.83,0,0,0-.39-1l-.09,0a.83.83,0,0,0-1,.39l0,.09-1.5,3.89v0l0,.05,0-.09,0,.13a.2.2,0,0,1,0,.07v.1a1.5,1.5,0,0,0,0,.2h0a.42.42,0,0,0,0,.1h0v0l0,.08-.05-.1a.54.54,0,0,0,.07.13.18.18,0,0,0,.05.07v0l.06.06,0,0,.09.06Z" transform="translate(0.05 0.05)"/>
-              </g>
-              </g>
-              </g>
-              </g>
-              </g>
-              </g>
-              </svg>
-              `
+              iconSize: [20, 20],
+              html: '<svg stroke="#3388FF" fill="#3388FF" stroke-width="0" viewBox="0 0 512 512" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z"></path></svg>'
           })
     this._rotationMarker = new L.marker(icoPosition,{icon:Icon})
     // this._rotationMarker = new RotateHandleClass(handlerPosition,
@@ -844,9 +821,9 @@ L.Handler.PathTransform = L.Handler.extend({
     // console.log(directions);
     // directions.push()
     // console.log("e",h,w,this._center._latlng,leftPoint,handlerPosition);
-    // this._direction = new L.Polygon(directions,{fill: true, weight:1,color:'#fff'}).addTo(this._handlersGroup);
-    // // this._direction
-    // this._handlers.push(this._direction);
+    this._direction = new L.Polygon(directions,{fill: true, weight:1,color:'#3388FF'}).addTo(this._handlersGroup);
+    // this._direction
+    this._handlers.push(this._direction);
   },
   _createDraggable(){
     var map = this._map;
@@ -862,19 +839,15 @@ L.Handler.PathTransform = L.Handler.extend({
     }
     var handlerPosition = map.layerPointToLatLng(
       L.PathTransform.pointOnLine(layerPointCenter,layerPointRight,
-        30)
+        20)
     );
     this._draggablePt = new L.marker(handlerPosition,{
       icon:L.divIcon({
               className: 'zoom-icon',
               iconSize: [25, 25],
-              html: '<svg stroke="#fff" fill="#fff" stroke-width="10" viewBox="0 0 512 512" height="25" width="25" xmlns="http://www.w3.org/2000/svg"><path d="M475.9 246.2l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l54.9 54.9-161.8.5.5-161.8 54.9 54.9c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l54.9-54.9.5 161.8-161.8-.5 54.9-54.9c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6L80 270.5l161.8-.5-.5 161.8-54.9-54.9c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-54.9 54.9-.5-161.8 161.8.5-54.9 54.9c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.5-5.4 5.5-14.2 0-19.6z"></path></svg>'
+              html: '<svg stroke="#3388FF" fill="#3388FF" stroke-width="10" viewBox="0 0 512 512" height="25" width="25" xmlns="http://www.w3.org/2000/svg"><path d="M475.9 246.2l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l54.9 54.9-161.8.5.5-161.8 54.9 54.9c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6l-79.4-79.4c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l54.9-54.9.5 161.8-161.8-.5 54.9-54.9c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-79.4 79.4c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l.2-.2c5.4-5.4 5.4-14.2 0-19.6L80 270.5l161.8-.5-.5 161.8-54.9-54.9c-5.4-5.4-14.2-5.4-19.6 0l-.2.2c-5.4 5.4-5.4 14.2 0 19.6l79.4 79.4c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.4-5.4 5.4-14.2 0-19.6l-.2-.2c-5.4-5.4-14.2-5.4-19.6 0l-54.9 54.9-.5-161.8 161.8.5-54.9 54.9c-5.4 5.4-5.4 14.2 0 19.6l.2.2c5.4 5.4 14.2 5.4 19.6 0l79.4-79.4c5.5-5.4 5.5-14.2 0-19.6z"></path></svg>'
           })
     }).addTo(this._handlersGroup);
-
-    this._draggablePt = new L.marker(handlerPosition).addTo(this._handlersGroup);
-
-    
     // this._draggablePt.on('mousedown',this._onDragStartD,this)
     L.DomEvent.on(this._draggablePt._icon,'mousedown pointerdown',this._onPointerDragStartD,this);
     this._handlers.push(this._draggablePt);
