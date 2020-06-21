@@ -839,7 +839,7 @@ L.Handler.PathTransform = L.Handler.extend({
     // console.log(directions);
     // directions.push()
     // console.log("e",h,w,this._center._latlng,leftPoint,handlerPosition);
-    this._direction = new L.Polygon(directions,{fill: true, weight:1,color:'#fff'}).addTo(this._handlersGroup);
+    this._direction = new L.Polygon(directions,{fill: false, weight:1,color:'transparent', stroke: 'transparent'}).addTo(this._handlersGroup);
     // this._direction
     this._handlers.push(this._direction);
   },
