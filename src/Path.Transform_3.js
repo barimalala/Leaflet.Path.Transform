@@ -857,7 +857,7 @@ L.Handler.PathTransform = L.Handler.extend({
     }
     var handlerPosition = map.layerPointToLatLng(
       L.PathTransform.pointOnLine(layerPointCenter,layerPointRight,
-        20)
+        30)
     );
     this._draggablePt = new L.marker(handlerPosition,{
       icon:L.divIcon({
