@@ -414,7 +414,7 @@ L.Handler.PathTransform = L.Handler.extend({
       L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,10)
     );
     var icoPosition = map.layerPointToLatLng(
-      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,20)
+      L.PathTransform.pointOnLine(layerPointBottom,layerPointTop,30)
     );
     // console.log("outstwo inde");
     //incliner le handler
